@@ -1,0 +1,79 @@
+{
+    "activeFile": "Départ_v1.json",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "C:/pokemon-game/game/assets/tilesets/4th_gen_outdoor_tileset_by_akizakura16_da5h3mn.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/building (2).tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/building.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/t.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 0.75
+        },
+        "C:/pokemon-game/game/assets/tilesets/test.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "Départ_v1.json": {
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 694,
+                "y": 162.66666666666669
+            }
+        },
+        "sprites.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/pokemon-game/game/assets/tilesets",
+    "map.height": 40,
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 80,
+    "openFiles": [
+        "Départ_v1.json",
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
+        "C:/pokemon-game/game/assets/tilesets/t.tsx",
+        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx",
+        "sprites.tsx"
+    ],
+    "project": "poke_map.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+        "sprites.tsx",
+        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx",
+        "C:/pokemon-game/game/assets/tilesets/t.tsx",
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
+        "Départ_v1.json",
+        "C:/pokemon-game/game/assets/tilesets/4th_gen_outdoor_tileset_by_akizakura16_da5h3mn.tsx",
+        "C:/pokemon-game/game/assets/tilesets/building.tsx",
+        "C:/pokemon-game/game/assets/tilesets/building (2).tsx",
+        "C:/pokemon-game/game/assets/tilesets/test.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
