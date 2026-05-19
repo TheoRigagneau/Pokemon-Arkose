@@ -6,7 +6,7 @@ const directions = {
 }
 export default
 class Player {
-    constructor(id, name, skinPath, position, map) {
+    constructor(id, name, skinPath, position, map, dialogBox) {
         this.id = id;
         this.name = name;
         this.map = map;
@@ -31,6 +31,8 @@ class Player {
         this.currentWalkSpriteStep = 0;
         this.walkSpriteDuration = 8;
 
+        this.dialogBox = dialogBox;
+
         this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false }
 
 
@@ -42,11 +44,18 @@ class Player {
                 case "q"    : this.inputState.left = true; break;
                 case "d"    : this.inputState.right = true; break;
                 case "shift": this.inputState.run = true; break;
-                case " "    :
+                case " ":
                     if (!this.inputState.interact) {
-                        this.interact()
+
+                        if (this.dialogBox.isOpen) {
+                            this.dialogBox.next();
+                        } else {
+                            this.interact();
+                        }
+
                     }
-                    this.inputState.interact = true
+
+                    this.inputState.interact = true;
                     break;
             }
         });
@@ -77,16 +86,6 @@ class Player {
             }
         }
         
-        for (const layer of this.map.layers) {
-            if (layer.name === "PNJ") {
-                for (const obj of layer.objects) {
-                    if (x >= obj.x && x < obj.x + obj.width &&
-                        y >= obj.y && y < obj.y + obj.height) {
-                        return true
-                    }
-                }
-            }
-}
         return false
     }
 interact() {
@@ -98,24 +97,44 @@ interact() {
     else if (this.direction === directions.west) checkX -= this.map.tilewidth
     else if (this.direction === directions.east) checkX += this.map.tilewidth
 
+    console.log("check:", checkX, checkY)
+
     for (const layer of this.map.layers) {
         if (layer.name === "interactions") {
             for (const obj of layer.objects) {
                 if (checkX >= obj.x && checkX < obj.x + obj.width &&
                     checkY >= obj.y && checkY < obj.y + obj.height) {
-                    console.log("Interaction !", obj.properties)
+                    const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                    if (info.type === "porte") {
+                        window.dispatchEvent(new CustomEvent("changeMap", {
+                            detail: {
+                                destination: info.destination,
+                                spawnX: info.spawnX,
+                                spawnY: info.spawnY
+                            }
+                        }))
+                    }
                     return
                 }
             }
         }
-    }
-    for (const layer of this.map.layers) {
         if (layer.name === "PNJ") {
             for (const obj of layer.objects) {
-                if (checkX >= obj.x && checkX < obj.x + obj.width &&
-                    checkY >= obj.y && checkY < obj.y + obj.height) {
-                    console.log("PNJ !", obj.properties)
-                    return
+
+                const info = Object.fromEntries(
+                    obj.properties.map(p => [p.name, p.value])
+                );
+
+                if (
+                    checkX >= obj.x - 16 &&
+                    checkX < obj.x + obj.width + 16 &&
+                    checkY >= obj.y - 16 &&
+                    checkY < obj.y + obj.height + 16
+                ) {
+
+                    this.dialogBox.show(info.dialogue);
+
+                    return;
                 }
             }
         }
@@ -124,55 +143,47 @@ interact() {
 
     move() {
         const speed = this.inputState.run ? 4 : 2;
-
         if (this.inputState.up) {
             this.direction = directions.north;
             if (!this.isColliding(this.renderX, this.renderY - speed)) {
                 this.renderY -= speed;
-                this.direction = directions.north;
                 this.isWalking = true;
             } else {
                 this.isWalking = false;
             }
-        } 
-
+        }
         else if (this.inputState.down) {
             this.direction = directions.south;
-            if (!this.isColliding(this.renderX, this.renderY + speed)) {
-            this.renderY += speed;
-            this.direction = directions.south;
-            this.isWalking = true;
+            if (!this.isColliding(this.renderX, this.renderY + 32 + speed)) {
+                this.renderY += speed;
+                this.isWalking = true;
             } else {
                 this.isWalking = false;
             }
-        } 
-        
+        }
         else if (this.inputState.left) {
             this.direction = directions.west;
-            if (!this.isColliding(this.renderX - speed, this.renderY)) {
-            this.renderX -= speed;
-            this.direction = directions.west;
-            this.isWalking = true;
+            if (!this.isColliding(this.renderX - 16 - speed, this.renderY + 16)) {
+                this.renderX -= speed;
+                this.isWalking = true;
             } else {
                 this.isWalking = false;
             }
-        } 
-        
+        }
         else if (this.inputState.right) {
             this.direction = directions.east;
-            if (!this.isColliding(this.renderX + speed, this.renderY)) {
-            this.renderX += speed;
-            this.direction = directions.east;
-            this.isWalking = true;
+            if (!this.isColliding(this.renderX + speed, this.renderY + 16)) {
+                this.renderX += speed;
+                this.isWalking = true;
             } else {
                 this.isWalking = false;
             }
-        } 
-        
+        }
         else {
             this.isWalking = false;
-        }     
+        }
     }
+    
 
     animate() {
 

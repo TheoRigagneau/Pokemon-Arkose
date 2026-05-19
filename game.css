@@ -1,0 +1,18 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+#gameContainer {
+    position: relative;
+    display: inline-block;
+}
+canvas {
+    border: 1px solid black;
+    display: block;
+}
+#uiCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}

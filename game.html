@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
-    <style>
-  canvas {
-    border: 1px solid black;
-  }
-</style>
+    <link rel="stylesheet" href="./game.css">
+ 
 </head>
 <body>
-    <canvas id="gameCanvas" width="1600" height="1000">
-        Fonctionne pas. 
-    </canvas>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1600" height="1000"></canvas>
+        <canvas id="uiCanvas" width="1600" height="1000"></canvas>
+    </div>
 
     <script type="module" src="./game.js"></script>
 </body>
