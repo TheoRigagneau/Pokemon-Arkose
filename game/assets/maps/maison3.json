@@ -167,12 +167,12 @@
                         {
                          "name":"spawnX",
                          "type":"int",
-                         "value":780
+                         "value":784
                         }, 
                         {
                          "name":"spawnY",
                          "type":"int",
-                         "value":224
+                         "value":673
                         }, 
                         {
                          "name":"type",

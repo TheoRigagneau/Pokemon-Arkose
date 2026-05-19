@@ -1,10 +1,21 @@
 {
-    "activeFile": "Départ_v1.json",
+    "activeFile": "Boscalis.json",
     "expandedProjectPaths": [
         "."
     ],
     "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
     "fileStates": {
+        "Boscalis.json": {
+            "expandedObjectLayers": [
+                15
+            ],
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 945.5,
+                "y": 106
+            }
+        },
         "C:/../../../Users/triga/hi_res_interior_general_tileset_by_akizakura16_d9qifn2.tsx": {
             "dynamicWrapping": true,
             "scaleInDock": 1
@@ -43,8 +54,8 @@
             "scale": 0.5,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 30,
-                "y": 436
+                "x": 640,
+                "y": 35
             }
         },
         "Départ_v2.json": {
@@ -57,6 +68,9 @@
                 "x": 188,
                 "y": -2
             }
+        },
+        "grass.tsx": {
+            "scaleInDock": 1
         },
         "house.tsx": {
             "dynamicWrapping": false
@@ -91,17 +105,19 @@
         "C:/pokemon-game/game/assets/tilesets/floor.tsx",
         "C:/pokemon-game/game/assets/tilesets/t.tsx",
         "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx",
-        "sprites.tsx"
+        "sprites.tsx",
+        "Boscalis.json"
     ],
     "project": "poke_map.tiled-project",
-    "property.type": "bool",
+    "property.type": "string",
     "recentFiles": [
-        "maison3.tmj",
-        "sprites.tsx",
-        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx",
-        "C:/pokemon-game/game/assets/tilesets/t.tsx",
-        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
         "Départ_v1.json",
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
+        "C:/pokemon-game/game/assets/tilesets/t.tsx",
+        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx",
+        "sprites.tsx",
+        "Boscalis.json",
+        "maison3.tmj",
         "C:/pokemon-game/game/assets/tilesets/4th_gen_outdoor_tileset_by_akizakura16_da5h3mn.tsx",
         "C:/pokemon-game/game/assets/tilesets/building.tsx",
         "C:/pokemon-game/game/assets/tilesets/building (2).tsx",
