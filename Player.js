@@ -6,7 +6,7 @@ const directions = {
 }
 export default
 class Player {
-    constructor(id, name, skinPath, position, map, dialogBox) {
+    constructor(id, name, skinPath, position, map, dialogBox, zonetransition) {
         this.id = id;
         this.name = name;
         this.map = map;
@@ -17,12 +17,6 @@ class Player {
         this.renderX = position[0];
         this.renderY = position[1];
 
-        this.new_x = position[0];
-        this.new_y = position[1];
-
-        this.last_x = this.new_x;
-        this.last_y = this.new_y;
-
         this.direction = directions.south;
         this.isWalking = false;
 
@@ -32,6 +26,12 @@ class Player {
         this.walkSpriteDuration = 8;
 
         this.dialogBox = dialogBox;
+        this.inZone = false;
+        this.zonetransition = zonetransition;
+        this.LastDirection = this.direction
+
+        this.targetX = this.renderX;
+        this.targetY = this.renderY;
 
         this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false }
 
@@ -88,58 +88,92 @@ class Player {
         
         return false
     }
-interact() {
-    let checkX = this.renderX
-    let checkY = this.renderY
+    interact() {
+        let checkX = this.renderX
+        let checkY = this.renderY
 
-    if (this.direction === directions.north) checkY -= this.map.tileheight
-    else if (this.direction === directions.south) checkY += this.map.tileheight
-    else if (this.direction === directions.west) checkX -= this.map.tilewidth
-    else if (this.direction === directions.east) checkX += this.map.tilewidth
+        if (this.direction === directions.north) checkY -= this.map.tileheight
+        else if (this.direction === directions.south) checkY += this.map.tileheight
+        else if (this.direction === directions.west) checkX -= this.map.tilewidth
+        else if (this.direction === directions.east) checkX += this.map.tilewidth
 
-    console.log("check:", checkX, checkY)
+        console.log("check:", checkX, checkY)
 
-    for (const layer of this.map.layers) {
-        if (layer.name === "interactions") {
-            for (const obj of layer.objects) {
-                if (checkX >= obj.x && checkX < obj.x + obj.width &&
-                    checkY >= obj.y && checkY < obj.y + obj.height) {
-                    const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
-                    if (info.type === "porte") {
-                        window.dispatchEvent(new CustomEvent("changeMap", {
-                            detail: {
-                                destination: info.destination,
-                                spawnX: info.spawnX,
-                                spawnY: info.spawnY
-                            }
-                        }))
+        for (const layer of this.map.layers) {
+            if (layer.name === "interactions") {
+                for (const obj of layer.objects) {
+                    if (checkX >= obj.x && checkX < obj.x + obj.width &&
+                        checkY >= obj.y && checkY < obj.y + obj.height) {
+                        const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                        if (info.type === "porte") {
+                            window.dispatchEvent(new CustomEvent("changeMap", {
+                                detail: {
+                                    destination: info.destination,
+                                    spawnX: info.spawnX,
+                                    spawnY: info.spawnY
+                                }
+                            }))
+                        }
+                        return
                     }
-                    return
                 }
             }
-        }
-        if (layer.name === "PNJ") {
-            for (const obj of layer.objects) {
 
-                const info = Object.fromEntries(
-                    obj.properties.map(p => [p.name, p.value])
-                );
+            if (layer.name === "PNJ") {
+                for (const obj of layer.objects) {
 
-                if (
-                    checkX >= obj.x - 16 &&
-                    checkX < obj.x + obj.width + 16 &&
-                    checkY >= obj.y - 16 &&
-                    checkY < obj.y + obj.height + 16
-                ) {
+                    const info = Object.fromEntries(
+                        obj.properties.map(p => [p.name, p.value])
+                    );
 
-                    this.dialogBox.show(info.dialogue);
+                    if (
+                        checkX >= obj.x - 16 &&
+                        checkX < obj.x + obj.width + 16 &&
+                        checkY >= obj.y - 16 &&
+                        checkY < obj.y + obj.height + 16
+                    ) {
 
-                    return;
+                        this.dialogBox.show(info.dialogue);
+
+                        return;
+                    }
                 }
             }
         }
     }
-}
+
+    checkZones() {
+        let FoundInZone = false
+        for (const layer of this.map.layers) {
+            if (layer.name === "transition") {
+                for (const obj of layer.objects) {
+                    if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
+                        this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
+                        const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                        if (this.direction === directions.west ) {
+                            FoundInZone = true;
+                            if (this.inZone === false) {
+                                this.zonetransition.show(info.ZL)
+                                this.inZone = true;
+                            }
+                        }
+                        if (this.direction === directions.east) {
+                            FoundInZone = true
+                            if (this.inZone === false) {
+                                this.zonetransition.show(info.ZR)
+                                this.inZone = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!FoundInZone) this.inZone = false
+        if (this.LastDirection !== this.direction) {
+            this.inZone = false
+        }
+        this.LastDirection = this.direction
+    }
 
     move() {
         const speed = this.inputState.run ? 4 : 2;
@@ -182,6 +216,7 @@ interact() {
         else {
             this.isWalking = false;
         }
+        this.checkZones()
     }
     
 
