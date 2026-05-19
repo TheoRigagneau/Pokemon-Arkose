@@ -3,14 +3,16 @@ body {
     padding: 0;
 }
 #gameContainer {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     display: inline-block;
 }
 canvas {
     border: 1px solid black;
     display: block;
 }
-#uiCanvas {
+#uiCanvas, #transitionCanvas {
     position: absolute;
     top: 0;
     left: 0;
