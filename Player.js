@@ -23,10 +23,13 @@ class Player {
         this.walkSpriteIndex = 0;
         this.walkSpritesNumber = 9;
         this.currentWalkSpriteStep = 0;
-        this.walkSpriteDuration = 8;
+        this.walkSpriteDuration = 16;
 
         this.dialogBox = dialogBox;
         this.inZone = false;
+        this.inGrass = false;
+        this.lastGrassTileX = null;
+        this.lastGrassTileY = null;
         this.zonetransition = zonetransition;
         this.LastDirection = this.direction
 
@@ -88,6 +91,19 @@ class Player {
         
         return false
     }
+    isOnGrass(x, y) {
+        const tileX = Math.floor(x / this.map.tilewidth)
+        const tileY = Math.floor(y / this.map.tileheight)
+        const tileIndex = tileY * this.map.width + tileX
+
+        for (const layer of this.map.layers) {
+            if (layer.name === "herbe" && layer.data[tileIndex] !== 0) {
+                return true
+            }
+        }
+        
+        return false
+    }
     interact() {
         let checkX = this.renderX
         let checkY = this.renderY
@@ -97,8 +113,6 @@ class Player {
         else if (this.direction === directions.west) checkX -= this.map.tilewidth
         else if (this.direction === directions.east) checkX += this.map.tilewidth
 
-        console.log("check:", checkX, checkY)
-
         for (const layer of this.map.layers) {
             if (layer.name === "interactions") {
                 for (const obj of layer.objects) {
@@ -106,13 +120,18 @@ class Player {
                         checkY >= obj.y && checkY < obj.y + obj.height) {
                         const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
                         if (info.type === "porte") {
+                            this.dialogBox.isOpen = false
                             window.dispatchEvent(new CustomEvent("changeMap", {
                                 detail: {
                                     destination: info.destination,
                                     spawnX: info.spawnX,
                                     spawnY: info.spawnY
                                 }
+                                
                             }))
+                        }
+                        else if (info.type === "pancarte" || "eau") {
+                            this.dialogBox.show(info.dialogue)
                         }
                         return
                     }
@@ -132,7 +151,6 @@ class Player {
                         checkY >= obj.y - 16 &&
                         checkY < obj.y + obj.height + 16
                     ) {
-
                         this.dialogBox.show(info.dialogue);
 
                         return;
@@ -153,6 +171,7 @@ class Player {
                         if (this.direction === directions.west ) {
                             FoundInZone = true;
                             if (this.inZone === false) {
+                                this.dialogBox.isOpen = false
                                 this.zonetransition.show(info.ZL)
                                 this.inZone = true;
                             }
@@ -160,7 +179,24 @@ class Player {
                         if (this.direction === directions.east) {
                             FoundInZone = true
                             if (this.inZone === false) {
+                                this.dialogBox.isOpen = false
                                 this.zonetransition.show(info.ZR)
+                                this.inZone = true;
+                            }
+                        }
+                        if (this.direction === directions.north) {
+                            FoundInZone = true
+                            if (this.inZone === false) {
+                                this.dialogBox.isOpen = false
+                                this.zonetransition.show(info.ZU)
+                                this.inZone = true;
+                            }
+                        }
+                        if (this.direction === directions.south) {
+                            FoundInZone = true
+                            if (this.inZone === false) {
+                                this.dialogBox.isOpen = false
+                                this.zonetransition.show(info.ZD)
                                 this.inZone = true;
                             }
                         }
@@ -176,53 +212,88 @@ class Player {
     }
 
     move() {
-        const speed = this.inputState.run ? 4 : 2;
-        if (this.inputState.up) {
-            this.direction = directions.north;
-            if (!this.isColliding(this.renderX, this.renderY - speed)) {
-                this.renderY -= speed;
-                this.isWalking = true;
+        if (this.dialogBox.isOpen) return
+        const speed = this.inputState.run ? 4 : 2
+        if (this.isMoving) {
+            const dx = this.targetX - this.renderX
+            const dy = this.targetY - this.renderY
+
+            if (Math.abs(dx) <= speed && Math.abs(dy) <= speed) {
+                this.renderX = this.targetX
+                this.renderY = this.targetY
+                this.isMoving = false
             } else {
-                this.isWalking = false;
+            this.renderX += Math.sign(dx) * speed
+            this.renderY += Math.sign(dy) * speed
             }
         }
-        else if (this.inputState.down) {
-            this.direction = directions.south;
-            if (!this.isColliding(this.renderX, this.renderY + 32 + speed)) {
-                this.renderY += speed;
-                this.isWalking = true;
-            } else {
-                this.isWalking = false;
-            }
-        }
-        else if (this.inputState.left) {
-            this.direction = directions.west;
-            if (!this.isColliding(this.renderX - 16 - speed, this.renderY + 16)) {
-                this.renderX -= speed;
-                this.isWalking = true;
-            } else {
-                this.isWalking = false;
-            }
-        }
-        else if (this.inputState.right) {
-            this.direction = directions.east;
-            if (!this.isColliding(this.renderX + speed, this.renderY + 16)) {
-                this.renderX += speed;
-                this.isWalking = true;
-            } else {
-                this.isWalking = false;
-            }
+        const currentTileX = Math.floor(this.renderX / 32)
+        const currentTileY = Math.floor(this.renderY / 32)
+        
+
+        if (this.isOnGrass(this.renderX, this.renderY)) {
+            if (!this.inGrass || currentTileX !== this.lastGrassTileX || currentTileY !== this.lastGrassTileY) {
+                window.dispatchEvent(new CustomEvent("grassStep", {
+                    detail: {
+                        tileX: Math.floor(this.renderX / 32),
+                        tileY: Math.floor(this.renderY / 32)
+                }}))
+                this.inGrass = true
+                this.lastGrassTileX = currentTileX
+                this.lastGrassTileY = currentTileY
+            } 
         }
         else {
-            this.isWalking = false;
+                this.inGrass = false
+        }
+
+        if (!this.isMoving) {
+            if (this.inputState.up) {
+                this.direction = directions.north;
+                this.targetX = this.renderX
+                this.targetY = this.renderY - 32
+                if (!this.isColliding(this.renderX, this.renderY -32)) {
+                    this.isMoving = true
+                    this.isWalking = true
+                }
+            }
+            else if (this.inputState.down) {
+                this.direction = directions.south;
+                this.targetX = this.renderX
+                this.targetY = this.renderY + 32
+                if (!this.isColliding(this.renderX, this.renderY + 32)) {
+                    this.isMoving = true
+                    this.isWalking = true
+                }
+            }
+            else if (this.inputState.left) {
+                this.direction = directions.west;
+                this.targetX = this.renderX - 32
+                this.targetY = this.renderY
+                if (!this.isColliding(this.renderX - 32, this.renderY )) {
+                    this.isMoving = true
+                    this.isWalking = true
+                }
+            }
+            else if (this.inputState.right) {
+                this.direction = directions.east;
+                this.targetX = this.renderX + 32
+                this.targetY = this.renderY
+                if (!this.isColliding(this.renderX + 32, this.renderY )) {
+                    this.isMoving = true
+                    this.isWalking = true
+                }
+            }
+            else {
+                this.isWalking = false;
+            }
         }
         this.checkZones()
     }
     
 
     animate() {
-
-        if (this.isWalking) {
+        if (this.isMoving) {
 
             this.currentWalkSpriteStep++;
             if (this.currentWalkSpriteStep >= this.walkSpriteDuration) {
@@ -238,7 +309,7 @@ class Player {
     draw(ctx, walkSprite, runSprite) {
         const spriteImage = this.inputState.run ? runSprite : walkSprite
         const directionRow = [2, 3, 1, 0][this.direction]
-        const col = !this.isWalking ? 0 :
+        const col = !this.isMoving ? 0 :
             this.inputState.run ? (this.walkSpriteIndex % 3) + 1 :
             this.walkSpriteIndex % 4
         
