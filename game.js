@@ -18,6 +18,8 @@ class GameView {
         this.trCtx = this.transitionCanvas.getContext("2d");
         this.transitionCanvas.width = window.innerWidth
         this.transitionCanvas.height = window.innerHeight
+        this.grassAnimations = [];
+        
     }
     async loadMap(path) {
         const ville1 = await fetch(path);
@@ -53,18 +55,20 @@ class GameView {
                             const tilesetInfo = [...this.map.tilesets].reverse().find(ts => tileId >= ts.firstgid)
                             if (tilesetInfo) {
                                 const source = tilesetInfo.source
-                                if (source.includes("house")) {
-                                    tileset = this.assets.get("house")
+                                if (source.includes("house2")) {
+                                    tileset = this.assets.get("house2")
                                     localTileId = tileId - tilesetInfo.firstgid + 1
                                 } else if (source.includes("grass")) {
                                     tileset = this.assets.get("herbe")
                                     tilesetColumns = tileset.width / 16
                                     localTileId = tileId - tilesetInfo.firstgid + 1
+                                } else if (source.includes("house")) {
+                                    tileset = this.assets.get("house")
+                                    localTileId = tileId - tilesetInfo.firstgid + 1
                                 }
                             }
                             const tilesetX = ((localTileId - 1) % tilesetColumns) * 16
                             const tilesetY = Math.floor((localTileId - 1) / tilesetColumns) * 16
-                            
                             ctx.drawImage(tileset, tilesetX, tilesetY, 16, 16, x, y, this.map.tilewidth, this.map.tileheight)
 
                         }
@@ -99,12 +103,15 @@ class GameView {
                             const tilesetInfo = [...this.map.tilesets].reverse().find(ts => tileId >= ts.firstgid)
                             if (tilesetInfo) {
                                 const source = tilesetInfo.source
-                                if (source.includes("house")) {
-                                    tileset = this.assets.get("house")
+                                if (source.includes("house2")) {
+                                    tileset = this.assets.get("house2")
                                     localTileId = tileId - tilesetInfo.firstgid + 1
                                 } else if (source.includes("grass")) {
                                     tileset = this.assets.get("herbe")
                                     tilesetColumns = tileset.width / 16
+                                    localTileId = tileId - tilesetInfo.firstgid + 1
+                                } else if (source.includes("house")) {
+                                    tileset = this.assets.get("house")
                                     localTileId = tileId - tilesetInfo.firstgid + 1
                                 }
                             }
@@ -120,20 +127,31 @@ class GameView {
         }
     }
     drawNPCs() {
-    for (const layer of this.map.layers) {
-        if (layer.name === "PNJ") {
-            for (const obj of layer.objects) {
-                const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
-                const sprite = this.assets.get(spriteKey)
-                if (sprite) {
-                    this.ctx.drawImage(sprite, 0, 0, 64, 64, obj.x - 32, obj.y - 32, 64, 64)
+        for (const layer of this.map.layers) {
+            if (layer.name === "PNJ") {
+                for (const obj of layer.objects) {
+                    const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
+                    const sprite = this.assets.get(spriteKey)
+                    if (sprite) {
+                        this.ctx.drawImage(sprite, 0, 0, 64, 64, obj.x - 32, obj.y - 32, 64, 64)
+                    }
                 }
             }
         }
     }
-}
+    drawGrassAnimations() {
+        for (const anim of this.grassAnimations) {
+            anim.timer = (anim.timer || 0) + 1
+            if (anim.timer % 4 === 0) {
+                anim.frame++}
+            const x = anim.tileX * 32
+            const y = anim.tileY * 32
+            const sx = anim.frame * 32
+            this.ctx.drawImage(this.assets.get("herbe"), sx, 0, 32, 32, x - 15, y, 32, 32)
+        }
+        this.grassAnimations = this.grassAnimations.filter(a => a.timer < 32)
+    }
     gameLoop() {
-        console.log(this.player.renderX, this.player.renderY)
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
         const zoom = 2
@@ -151,13 +169,15 @@ class GameView {
             
         this.player.move();
         this.player.animate();
+        this.drawGrassAnimations();
         this.player.draw(this.ctx, this.playerWalkSprite, this.playerRunSprite);
+        this.ctx.drawImage(this.offscreenUp, 0, 0);
 
         this.ctx.restore();
-        this.dialogBox.draw();
-        console.log(this.uiCanvas)
+        this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
         this.transition.update();
-        this.transition.draw(this.uiCtx, this.uiCanvas)
+        this.transition.draw(this.uiCtx, this.uiCanvas);
+        this.dialogBox.draw();
         this.zoneTransition.update();
         this.zoneTransition.draw(this.uiCtx,this.transitionCanvas);
 
@@ -171,6 +191,7 @@ class GameView {
         this.assets = new Assets()
         await this.assets.load("tileset", "./game/assets/tilesets/sprites.png");
         await this.assets.load("house", "./game/assets/tilesets/house.png");
+        await this.assets.load("house2", "./game/assets/tilesets/house2.png");
         await this.assets.load("herbe", "./game/assets/tilesets/grass.png");
         await this.assets.load("playerWalk", "./game/assets/tilesets/png/npc_198_Lucas.png");
         await this.assets.load("playerRun", "./game/assets/tilesets/png/npc_198_Lucas_run.png");
@@ -179,25 +200,39 @@ class GameView {
 
         this.tileset = this.assets.get("tileset");
 
-        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2"])
-        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"])
+        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2","herbe"])
+        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2","tapis"])
+        this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
+                                                        "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe","tapis"])
 
         this.playerWalkSprite = this.assets.get("playerWalk");
         this.playerRunSprite = this.assets.get("playerRun");
         this.dialogBox = new DialogBox();
         this.zoneTransition = new zoneTransition();
-        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [326, 689], this.map, this.dialogBox, this.zoneTransition);
+        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2112], this.map, this.dialogBox, this.zoneTransition);
         this.transition = new Transition();
 
         window.addEventListener("changeMap", async (e) => {
             this.transition.start(async () => {
+                this.dialogBox.isOpen = false
                 await this.loadMap(`./game/assets/maps/${e.detail.destination}.json`)
-                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2"])
+                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2",'herbe'])
                 this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"]);
+                this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
+                                                        "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe"])
                 this.player.map = this.map
                 this.player.renderX = e.detail.spawnX
                 this.player.renderY = e.detail.spawnY
             })
+        })
+        window.addEventListener("grassStep", (e) => {
+            const exists = this.grassAnimations.find(a => a.tileX === e.detail.tileX && a.tileY === e.detail.tileY)
+            if (!exists) {
+            this.grassAnimations.push({
+                tileX: e.detail.tileX,
+                tileY: e.detail.tileY,
+                frame: 0
+            })}
         })
         this.gameLoop()
 
