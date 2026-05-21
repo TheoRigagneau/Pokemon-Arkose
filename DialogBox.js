@@ -5,6 +5,7 @@ export default class DialogBox {
         this.isOpen = false;
     }
     show(texte) {
+        console.log("show appelé", texte)
         this.messages = texte.split("|");
         this.currentIndex = 0
         this.isOpen = true
@@ -16,23 +17,24 @@ export default class DialogBox {
         }
     }
    draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (!this.isOpen) return
-
     const pad = 20
     const h = 140
     const y = this.canvas.height - h - pad
     const w = this.canvas.width - pad * 2
 
+    
     this.ctx.fillStyle = "#f0f0e8"
     this.ctx.roundRect(pad, y, w, h, 14)
     this.ctx.fill()
 
+    this.ctx.beginPath()
     this.ctx.strokeStyle = "#1a1a2e"
     this.ctx.lineWidth = 4
     this.ctx.roundRect(pad, y, w, h, 14)
     this.ctx.stroke()
 
+    this.ctx.beginPath()
     this.ctx.strokeStyle = "#f0f0e8"
     this.ctx.lineWidth = 2
     this.ctx.roundRect(pad + 6, y + 6, w - 12, h - 12, 9)
