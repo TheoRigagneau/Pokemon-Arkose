@@ -39,13 +39,16 @@ class zonetransition {
     draw(ctx, canvas) {
         if (!this.active) return
         ctx.globalAlpha = this.opacity;
+        ctx.beginPath()
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)"
-        ctx.roundRect(16, 30, 220, 50, 4)
+        ctx.roundRect(16, 30, 300, 80, 4)
         ctx.fill()
 
         ctx.fillStyle = "white"
-        ctx.font = "bold 20px monospace"
-        ctx.fillText(this.zonename, 30, 65)
+        ctx.font = "bold 24px monospace"
+        ctx.textAlign = "center"
+        ctx.fillText(this.zonename, 16 + 300/2, 30 + 80/2 + 8)
+        ctx.textAlign = "left"
 
         ctx.globalAlpha = 1
     }
