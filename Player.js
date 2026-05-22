@@ -6,7 +6,7 @@ const directions = {
 }
 export default
 class Player {
-    constructor(id, name, skinPath, position, map, dialogBox, zonetransition) {
+    constructor(id, name, skinPath, position, map, dialogBox, transition ,zonetransition) {
         this.id = id;
         this.name = name;
         this.map = map;
@@ -30,6 +30,7 @@ class Player {
         this.inGrass = false;
         this.lastGrassTileX = null;
         this.lastGrassTileY = null;
+        this.transition = transition
         this.zonetransition = zonetransition;
         this.LastDirection = this.direction
 
@@ -130,7 +131,7 @@ class Player {
                                 
                             }))
                         }
-                        else if (info.type === "pancarte" || "eau") {
+                        else if (info.type === "pancarte" || "eau" ||"statue") {
                             this.dialogBox.show(info.dialogue)
                         }
                         return
@@ -211,7 +212,7 @@ class Player {
         this.LastDirection = this.direction
     }
 
-    move() {
+    async move() {
         if (this.dialogBox.isOpen) return
         const speed = this.inputState.run ? 4 : 2
         if (this.isMoving) {
@@ -241,7 +242,33 @@ class Player {
                 this.inGrass = true
                 this.lastGrassTileX = currentTileX
                 this.lastGrassTileY = currentTileY
-            } 
+                let encounters = Math.floor(Math.random()*7);
+                if (encounters == 5) {
+                    for (const layer of this.map.layers) {
+                        if (layer.name === "localisation") {
+                            for (const obj of layer.objects) {
+                                if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
+                                    this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
+                                    const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                                    const response = await fetch("./encounters.json")
+                                    const encounters = await response.json()
+                                    const encounters_route = encounters[info.route]
+                                    let random_spawn = Math.floor(Math.random()*100)
+                                    let poke = 0
+                                    while ( random_spawn > 0 ) {   
+                                        random_spawn -= encounters_route[poke].chance
+                                        poke+=1
+                                    }
+                                    const poke_encounter = encounters_route[(poke-1)].pokemon;
+                                    console.log(poke_encounter)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+
         }
         else {
                 this.inGrass = false
