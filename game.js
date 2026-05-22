@@ -200,25 +200,25 @@ class GameView {
 
         this.tileset = this.assets.get("tileset");
 
-        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2","herbe"])
-        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2","tapis"])
-        this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
+        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2","tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2","herbe"])
+        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"])
+        this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
                                                         "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe","tapis"])
 
         this.playerWalkSprite = this.assets.get("playerWalk");
         this.playerRunSprite = this.assets.get("playerRun");
         this.dialogBox = new DialogBox();
         this.zoneTransition = new zoneTransition();
-        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2112], this.map, this.dialogBox, this.zoneTransition);
+        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
         this.transition = new Transition();
 
         window.addEventListener("changeMap", async (e) => {
             this.transition.start(async () => {
                 this.dialogBox.isOpen = false
                 await this.loadMap(`./game/assets/maps/${e.detail.destination}.json`)
-                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2",'herbe'])
+                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2",'herbe'])
                 this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"]);
-                this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
+                this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
                                                         "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe"])
                 this.player.map = this.map
                 this.player.renderX = e.detail.spawnX
