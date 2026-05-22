@@ -1,0 +1,48 @@
+{
+  "route1_herbe" : [
+    {
+      "pokemon": "Roucool",
+      "niveauMin": 2,
+      "niveauMax": 4,
+      "chance": 40
+    },
+    {
+      "pokemon": "Chenipan",
+      "niveauMin": 3,
+      "niveauMax": 5,
+      "chance": 35
+    },
+    {
+      "pokemon": "Keunotor",
+      "niveauMin": 2,
+      "niveauMax": 5,
+      "chance": 25
+    }
+  ],
+  "route2_herbe" : [
+    {
+        "pokemon": "Pikachu",
+      "niveauMin": 3,
+      "niveauMax": 6,
+      "chance": 20
+    },
+    {
+      "pokemon": "Roucool",
+      "niveauMin": 3,
+      "niveauMax": 5,
+      "chance": 35
+    },
+    {
+      "pokemon": "Keunotor",
+      "niveauMin": 2,
+      "niveauMax": 5,
+      "chance": 30
+    },
+    {
+      "pokemon": "Miaouss",
+      "niveauMin": 2,
+      "niveauMax": 5,
+      "chance": 15
+    }
+  ]
+}
