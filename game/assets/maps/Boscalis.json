@@ -906,27 +906,6 @@
         }, 
         {
          "draworder":"topdown",
-         "id":24,
-         "name":"Calque d'Objets 4",
-         "objects":[],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "id":25,
-         "image":"",
-         "name":"Calque d'Images 1",
-         "opacity":1,
-         "type":"imagelayer",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
          "id":9,
          "name":"PNJ",
          "objects":[
