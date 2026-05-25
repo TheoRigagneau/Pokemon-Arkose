@@ -36,6 +36,7 @@ class Player {
 
         this.targetX = this.renderX;
         this.targetY = this.renderY;
+        this.inBattle = false
 
         this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false }
 
@@ -256,7 +257,7 @@ class Player {
     }
 
     async move() {
-        if (this.dialogBox.isOpen) return
+        if (this.dialogBox.isOpen || this.inBattle) return
         const speed = this.inputState.run ? 4 : 2
         if (this.isMoving) {
             const dx = this.targetX - this.renderX

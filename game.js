@@ -157,6 +157,7 @@ class GameView {
         if (this.battle) {
             this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
             this.trCtx.clearRect(0, 0, this.transitionCanvas.width, this.transitionCanvas.height)
+            this.battle.update()
             this.battle.draw()
         } else {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -187,6 +188,7 @@ class GameView {
             this.dialogBox.draw();
             this.zoneTransition.update();
             this.zoneTransition.draw(this.uiCtx,this.transitionCanvas);
+
 
         }
         requestAnimationFrame(() => this.gameLoop());
@@ -244,11 +246,21 @@ class GameView {
                 id: e.detail.id,
                 niveau: e.detail.niveau
             }
-            this.transition.start(async () => {
-                this.battle = new Battle(this.ctx, this.canvas, this.currentEncounter)
-                await this.battle.init()
-                })
-            })
+            const waitForMove = setInterval(() => {
+                if (!this.player.isMoving) {
+                    clearInterval(waitForMove)
+                    this.player.inBattle = true
+                    this.transition.start(async () => {
+                        this.battle = new Battle(this.ctx, this.canvas, this.currentEncounter)
+                        await this.battle.init()
+                    })
+                }
+            }, 16)
+        })
+        window.addEventListener("endBattle", () => {
+            this.battle = null
+            this.player.inBattle = false
+        })
 
         this.gameLoop()
 

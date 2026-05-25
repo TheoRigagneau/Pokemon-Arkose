@@ -2,7 +2,7 @@
   "route1_herbe" : [
     {
       "pokemon": "Roucool",
-      "id": 21,
+      "id": 16,
       "niveauMin": 2,
       "niveauMax": 4,
       "chance": 40
@@ -16,7 +16,7 @@
     },
     {
       "pokemon": "Keunotor",
-      "id": 402,
+      "id": 399,
       "niveauMin": 2,
       "niveauMax": 5,
       "chance": 25
