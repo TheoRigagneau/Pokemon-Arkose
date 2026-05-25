@@ -211,6 +211,49 @@ class Player {
         }
         this.LastDirection = this.direction
     }
+    async Encounter(currentTileX, currentTileY) {
+        window.dispatchEvent(new CustomEvent("grassStep", {
+                detail: {
+                    tileX: Math.floor(this.renderX / 32),
+                    tileY: Math.floor(this.renderY / 32)
+            }}))
+        this.inGrass = true
+        this.lastGrassTileX = currentTileX
+        this.lastGrassTileY = currentTileY
+        let encounters = Math.floor(Math.random()*7);
+        if (encounters == 5) {
+            for (const layer of this.map.layers) {
+                if (layer.name === "localisation") {
+                    for (const obj of layer.objects) {
+                        if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
+                            this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
+                            const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                            const response = await fetch("./encounters.json")
+                            const encounters = await response.json()
+                            const encounters_route = encounters[info.route]
+                            let random_spawn = Math.floor(Math.random()*100)
+                            let poke = 0
+                            console.log(info.route, encounters)
+                            while ( random_spawn > 0  && poke < encounters_route.length) {   
+                                random_spawn -= encounters_route[poke].chance
+                                poke+=1
+                            }
+                            const poke_encounter = encounters_route[(poke-1)].pokemon;
+                            const niveau = Math.floor(Math.random() * (encounters_route[poke-1].niveauMax - encounters_route[poke-1].niveauMin + 1)) + encounters_route[poke-1].niveauMin;
+                            
+                            window.dispatchEvent(new CustomEvent("startbattle", {
+                                detail: {
+                                    pokemon: poke_encounter,
+                                    id: encounters_route[poke-1].id,
+                                    niveau: niveau
+                                }
+                            }))
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     async move() {
         if (this.dialogBox.isOpen) return
@@ -234,38 +277,8 @@ class Player {
 
         if (this.isOnGrass(this.renderX, this.renderY)) {
             if (!this.inGrass || currentTileX !== this.lastGrassTileX || currentTileY !== this.lastGrassTileY) {
-                window.dispatchEvent(new CustomEvent("grassStep", {
-                    detail: {
-                        tileX: Math.floor(this.renderX / 32),
-                        tileY: Math.floor(this.renderY / 32)
-                }}))
-                this.inGrass = true
-                this.lastGrassTileX = currentTileX
-                this.lastGrassTileY = currentTileY
-                let encounters = Math.floor(Math.random()*7);
-                if (encounters == 5) {
-                    for (const layer of this.map.layers) {
-                        if (layer.name === "localisation") {
-                            for (const obj of layer.objects) {
-                                if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
-                                    this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
-                                    const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
-                                    const response = await fetch("./encounters.json")
-                                    const encounters = await response.json()
-                                    const encounters_route = encounters[info.route]
-                                    let random_spawn = Math.floor(Math.random()*100)
-                                    let poke = 0
-                                    while ( random_spawn > 0 ) {   
-                                        random_spawn -= encounters_route[poke].chance
-                                        poke+=1
-                                    }
-                                    const poke_encounter = encounters_route[(poke-1)].pokemon;
-                                    console.log(poke_encounter)
-                                }
-                            }
-                        }
-                    }
-                }
+               const pokemon_encounter = this.Encounter(currentTileX, currentTileY)
+               
             }
             
 
