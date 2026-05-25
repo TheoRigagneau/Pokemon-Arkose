@@ -1,8 +1,10 @@
 import Player from "./Player.js";
 import Assets from "./Assets.js";
+import { ASSETS } from "./assets_config.js"
 import DialogBox from "./DialogBox.js"
 import Transition from "./animations/Transition.js"
 import zoneTransition from "./animations/zonetransition.js"
+import Battle from "./Battle.js"
 
 class GameView {
     constructor() {
@@ -152,35 +154,41 @@ class GameView {
         this.grassAnimations = this.grassAnimations.filter(a => a.timer < 32)
     }
     gameLoop() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        if (this.battle) {
+            this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
+            this.trCtx.clearRect(0, 0, this.transitionCanvas.width, this.transitionCanvas.height)
+            this.battle.draw()
+        } else {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        const zoom = 2
-        const camX = this.canvas.width / (2 * zoom) - this.player.renderX
-        const camY = this.canvas.height / (2 * zoom) - this.player.renderY
+            const zoom = 2
+            const camX = this.canvas.width / (2 * zoom) - this.player.renderX
+            const camY = this.canvas.height / (2 * zoom) - this.player.renderY
 
-        this.ctx.save()
-        this.ctx.scale(zoom, zoom)
-        this.ctx.translate(camX, camY)
+            this.ctx.save()
+            this.ctx.scale(zoom, zoom)
+            this.ctx.translate(camX, camY)
+                    
+            this.ctx.drawImage(this.offscreenBottom, 0, 0);
+            this.drawDynamicLayers();
+            this.ctx.drawImage(this.offscreenTop, 0, 0);
+            this.drawNPCs();
                 
-        this.ctx.drawImage(this.offscreenBottom, 0, 0);
-        this.drawDynamicLayers();
-        this.ctx.drawImage(this.offscreenTop, 0, 0);
-        this.drawNPCs();
-            
-        this.player.move();
-        this.player.animate();
-        this.drawGrassAnimations();
-        this.player.draw(this.ctx, this.playerWalkSprite, this.playerRunSprite);
-        this.ctx.drawImage(this.offscreenUp, 0, 0);
+            this.player.move();
+            this.player.animate();
+            this.drawGrassAnimations();
+            this.player.draw(this.ctx, this.playerWalkSprite, this.playerRunSprite);
+            this.ctx.drawImage(this.offscreenUp, 0, 0);
 
-        this.ctx.restore();
-        this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
-        this.transition.update();
-        this.transition.draw(this.uiCtx, this.uiCanvas);
-        this.dialogBox.draw();
-        this.zoneTransition.update();
-        this.zoneTransition.draw(this.uiCtx,this.transitionCanvas);
+            this.ctx.restore();
+            this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
+            this.transition.update();
+            this.transition.draw(this.uiCtx, this.uiCanvas);
+            this.dialogBox.draw();
+            this.zoneTransition.update();
+            this.zoneTransition.draw(this.uiCtx,this.transitionCanvas);
 
+        }
         requestAnimationFrame(() => this.gameLoop());
     }
 
@@ -189,14 +197,9 @@ class GameView {
         await this.loadMap("./game/assets/maps/Boscalis.json")
 
         this.assets = new Assets()
-        await this.assets.load("tileset", "./game/assets/tilesets/sprites.png");
-        await this.assets.load("house", "./game/assets/tilesets/house.png");
-        await this.assets.load("house2", "./game/assets/tilesets/house2.png");
-        await this.assets.load("herbe", "./game/assets/tilesets/grass.png");
-        await this.assets.load("playerWalk", "./game/assets/tilesets/png/npc_198_Lucas.png");
-        await this.assets.load("playerRun", "./game/assets/tilesets/png/npc_198_Lucas_run.png");
-        await this.assets.load("npc_1", "./game/assets/tilesets/png/NPC_001_Ace_Trainer_M.png") ;
-        await this.assets.load("npc_3", "./game/assets/tilesets/png/NPC_049_Collector.png") ;
+        for (const asset of ASSETS) {
+            await this.assets.load(asset.key, asset.path)
+        }
 
         this.tileset = this.assets.get("tileset");
 
@@ -209,8 +212,8 @@ class GameView {
         this.playerRunSprite = this.assets.get("playerRun");
         this.dialogBox = new DialogBox();
         this.zoneTransition = new zoneTransition();
-        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
         this.transition = new Transition();
+        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
 
         window.addEventListener("changeMap", async (e) => {
             this.transition.start(async () => {
@@ -234,6 +237,19 @@ class GameView {
                 frame: 0
             })}
         })
+        window.addEventListener("startbattle", async (e) => {
+            this.zoneTransition.active = false
+            this.currentEncounter = {
+                pokemon: e.detail.pokemon,
+                id: e.detail.id,
+                niveau: e.detail.niveau
+            }
+            this.transition.start(async () => {
+                this.battle = new Battle(this.ctx, this.canvas, this.currentEncounter)
+                await this.battle.init()
+                })
+            })
+
         this.gameLoop()
 
         
