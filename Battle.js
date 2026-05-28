@@ -4,17 +4,54 @@ export default class Battle {
         this.canvas = canvas
         this.encounter = encounter
         this.enemyDisplayHP = this.enemyMaxHP
+        this.currentMenu = "main"
         window.addEventListener("keydown", (event) => {
-        if (event.key === "a") {
-            console.log("keydown battle", event.key)
-            this.enemyCurrentHP -= 10
-            if (this.enemyCurrentHP < 0) this.enemyCurrentHP = 0
-        }
-})
+            if (event.key === "a") {
+                console.log("keydown battle", event.key)
+                this.enemyCurrentHP -= 10
+                if (this.enemyCurrentHP < 0) this.enemyCurrentHP = 0
+            }
+        })
+            this.canvas.addEventListener("click", (e) => {
+            const rect = this.canvas.getBoundingClientRect()
+            const mouseX = e.clientX - rect.left
+            const mouseY = e.clientY - rect.top
+            
+            const w = this.canvas.width
+            const h = this.canvas.height
+            const bw = w * 0.32
+            const bh = h * 0.1
+
+            if (this.currentMenu !== "main") {
+                const backX = w * 0.85
+                const backY = h * 0.62
+                const backW = w * 0.12
+                const backH = h * 0.06
+                
+                if (mouseX >= backX && mouseX <= backX + backW &&
+                    mouseY >= backY && mouseY <= backY + backH) {
+                    this.currentMenu = "main"
+                    return
+                }
+            }
+            const buttons = [
+                { label: "COMBAT", x: w * 0.3, y: h * 0.68 },
+                { label: "SAC", x: w * 0.7, y: h * 0.68 },
+                { label: "POKEMON", x: w * 0.3, y: h * 0.84 },
+                { label: "FUITE", x: w * 0.7, y: h * 0.84 },
+            ]
+            
+            for (const btn of buttons) {
+                if (mouseX >= btn.x - bw/2 && mouseX <= btn.x + bw/2 &&
+                    mouseY >= btn.y - bh/2 && mouseY <= btn.y + bh/2) {
+                    this.handleButton(btn.label)
+                }
+            }
+        })
     }
 
     async init() {
-        this.enemySprite = await this.loadImage(`./game/assets/pokemon/dp/${this.encounter.id}.png`)
+        this.enemySprite = await this.loadImage(`./game/assets/pokemon/dp/shiny/${this.encounter.id}.png`)
         this.field = await this.loadImage("./game/assets/battle/field_day.png")
         this.platform = await this.loadImage("./game/assets/battle/grass_platform.png")
         this.enemy_hp_bar = await this.loadImage("./game/assets/battle/enemy_hp_bar.png")
@@ -29,6 +66,11 @@ export default class Battle {
         this.enemyDisplayHP = this.enemyMaxHP
         this.enemyCurrentHP = this.enemyMaxHP
         this.battleEnded = false
+        this.teamSlotBlue = await this.loadImage("./game/assets/battle/blue_bc_team.png")
+        this.teamSlotBlack = await this.loadImage("./game/assets/battle/black_bc_team.png")
+        this.slot_obj = await this.loadImage("./game/assets/battle/fond_objets.png")
+        this.background = await this.loadImage("./game/assets/battle/bg_obj.png")
+        this.attack = await this.loadImage("./game/assets/battle/green_attack_slot")
     }
 
     loadImage(path) {
@@ -41,6 +83,72 @@ export default class Battle {
             resolve(null)
         }
         })
+    }
+
+    drawButtons(ctx, w, h) {
+        const buttons = [
+            { label: "COMBAT", color: "#e05555", shadow: "#a03030", x: w * 0.3, y: h * 0.68 },
+            { label: "SAC", color: "#d4a020", shadow: "#9a6e10", x: w * 0.7, y: h * 0.68 },
+            { label: "POKEMON", color: "#50a850", shadow: "#307030", x: w * 0.3, y: h * 0.84 },
+            { label: "FUITE", color: "#4080d0", shadow: "#205090", x: w * 0.7, y: h * 0.84 },
+        ]
+
+        const bw = w * 0.32
+        const bh = h * 0.1
+
+        for (const btn of buttons) {
+            const bx = btn.x - bw / 2
+            const by = btn.y - bh / 2
+
+            ctx.fillStyle = btn.shadow
+            ctx.beginPath()
+            ctx.roundRect(bx + 4, by + 6, bw, bh, 16)
+            ctx.fill()
+
+            ctx.fillStyle = btn.color
+            ctx.beginPath()
+            ctx.roundRect(bx, by, bw, bh, 16)
+            ctx.fill()
+
+            ctx.fillStyle = "rgba(255,255,255,0.25)"
+            ctx.beginPath()
+            ctx.roundRect(bx + 8, by + 4, bw - 16, bh * 0.4, 10)
+            ctx.fill()
+
+            ctx.fillStyle = "white"
+            ctx.font = "bold 13px 'Press Start 2P'"
+            ctx.textAlign = "center"
+            ctx.shadowColor = "rgba(0,0,0,0.4)"
+            ctx.shadowBlur = 4
+            ctx.fillText(btn.label, btn.x, btn.y + 6)
+            ctx.shadowBlur = 0
+            ctx.textAlign = "left"
+        }
+    }
+    drawObjects(ctx, w, h) {
+    ctx.fillStyle = "#6b5f78"
+    ctx.fillRect(0, h * 0.6, w, h * 0.4)
+
+        if (this.slot_obj) {
+            ctx.drawImage(this.slot_obj, w * 0.1, h * 0.62, w * 0.6, h * 0.35)
+        }
+        
+    }
+    drawAttacks(ctx, w, h) {
+        ctx.fillStyle = "#6b5f78"
+        ctx.fillRect(0, h * 0.6, w, h * 0.4)
+    }
+    drawTeam(ctx, w, h) {
+        ctx.fillStyle = "#6b5f78"
+        ctx.fillRect(0, h * 0.6, w, h * 0.4)
+    }
+
+    handleButton(label) {
+        if (label === "COMBAT") this.currentMenu = "fight"
+        if (label === "SAC") this.currentMenu = "bag" 
+        if (label === "POKEMON") this.currentMenu = "pokemon"
+        if (label === "FUITE") window.dispatchEvent(new CustomEvent("endBattle"))
+
     }
 
     draw() {
@@ -69,31 +177,38 @@ export default class Battle {
         ctx.fillStyle = "#1a3a0f"
         ctx.fillRect(0, h * 0.6, w, 4)
 
-        if (this.enemySprite  && this.enemyDisplayHP > 0) {
-            ctx.drawImage(this.enemySprite, w * 0.62, h * 0.08, 220, 220)
-        }
-        ctx.strokeStyle = "black"
-        ctx.lineWidth = 3
-        ctx.strokeText(this.encounter.pokemon, w * 0.04, h * 0.09)
-        ctx.strokeText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
-        ctx.fillStyle = "white"
-        ctx.font = "bold 18px 'Press Start 2P'"
-        ctx.fillText(this.encounter.pokemon, w * 0.04, h * 0.085)
-        ctx.fillText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
+        if (this.currentMenu === "main") this.drawButtons(ctx, w, h)
+        else if (this.currentMenu === "bag") this.drawObjects(ctx, w, h)
+        else if (this.currentMenu === "fight") this.drawAttacks(ctx, w, h)
+        else if (this.currentMenu === "pokemon") this.drawTeam(ctx, w, h)
 
-        if (this.enemyMaxHP) {
-            const barX = w * 0.02 + 600 * 0.311
-            const barY = h * 0.04 + 120 * 0.535
-            const barMaxWidth = 600 * 0.305
-            const barHeight = 7
 
-            const hpPercent = this.enemyDisplayHP / this.enemyMaxHP
-            const barColor = hpPercent > 0.5 ? "#00c800" : hpPercent > 0.2 ? "#f8d030" : "#f82800"
+    if (this.enemySprite  && this.enemyDisplayHP > 0) {
+        ctx.drawImage(this.enemySprite, w * 0.62, h * 0.08, 220, 220)
+    }
+    
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 3
+    ctx.strokeText(this.encounter.pokemon, w * 0.04, h * 0.09)
+    ctx.strokeText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
+    ctx.fillStyle = "white"
+    ctx.font = "bold 18px 'Press Start 2P'"
+    ctx.fillText(this.encounter.pokemon, w * 0.04, h * 0.085)
+    ctx.fillText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
 
-            ctx.fillStyle = barColor
-            ctx.fillRect(barX, barY, barMaxWidth * hpPercent, barHeight)
-            }
-        }
+    if (this.enemyMaxHP) {
+        const barX = w * 0.02 + 600 * 0.311
+        const barY = h * 0.04 + 120 * 0.535
+        const barMaxWidth = 600 * 0.305
+        const barHeight = 7
+
+        const hpPercent = this.enemyDisplayHP / this.enemyMaxHP
+        const barColor = hpPercent > 0.5 ? "#00c800" : hpPercent > 0.2 ? "#f8d030" : "#f82800"
+
+        ctx.fillStyle = barColor
+        ctx.fillRect(barX, barY, barMaxWidth * hpPercent, barHeight)
+    }
+}
 
     update() {
         if (this.enemyDisplayHP > this.enemyCurrentHP) {
@@ -105,6 +220,6 @@ export default class Battle {
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent("endBattle"))
             }, 1000)
-}
+        }
     }
 }

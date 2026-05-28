@@ -229,9 +229,8 @@ class Player {
                         if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
                             this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
                             const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
-                            const response = await fetch("./encounters.json")
-                            const encounters = await response.json()
-                            const encounters_route = encounters[info.route]
+                            const response = await fetch(`http://localhost:3000/api/encounters/${info.route}`)
+                            const encounters_route = await response.json()
                             let random_spawn = Math.floor(Math.random()*100)
                             let poke = 0
                             console.log(info.route, encounters)

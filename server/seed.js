@@ -1,0 +1,32 @@
+require('dotenv').config({ path: __dirname + '/.env' });
+const mongoose = require('mongoose');
+const Encounter = require('./models/Encounter');
+
+const data = [
+  {
+    zone: "route1_herbe",
+    pokemons: [
+      { pokemon: "Roucool", id: 16, niveauMin: 2, niveauMax: 4, chance: 40 },
+      { pokemon: "Chenipan", id: 10, niveauMin: 3, niveauMax: 5, chance: 35 },
+      { pokemon: "Keunotor", id: 399, niveauMin: 2, niveauMax: 5, chance: 25 }
+    ]
+  },
+  {
+    zone: "route2_herbe",
+    pokemons: [
+      { pokemon: "Pikachu", id: 25, niveauMin: 3, niveauMax: 6, chance: 20 },
+      { pokemon: "Roucool", id: 21, niveauMin: 3, niveauMax: 5, chance: 35 },
+      { pokemon: "Keunotor", id: 402, niveauMin: 2, niveauMax: 5, chance: 30 },
+      { pokemon: "Miaouss", id: 52, niveauMin: 2, niveauMax: 5, chance: 15 }
+    ]
+  }
+];
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(async () => {
+    await Encounter.deleteMany({});
+    await Encounter.insertMany(data);
+    console.log('Données importées !');
+    mongoose.disconnect();
+  })
+  .catch(err => console.error(err));
