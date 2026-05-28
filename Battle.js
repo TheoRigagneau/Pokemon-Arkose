@@ -5,14 +5,19 @@ export default class Battle {
         this.encounter = encounter
         this.enemyDisplayHP = this.enemyMaxHP
         this.currentMenu = "main"
+
         window.addEventListener("keydown", (event) => {
             if (event.key === "a") {
-                console.log("keydown battle", event.key)
                 this.enemyCurrentHP -= 10
                 if (this.enemyCurrentHP < 0) this.enemyCurrentHP = 0
             }
+            if (event.key === "v") {
+                this.playerCurrentHP -=10
+                if (this.playerCurrentHP < 0) this.playerCurrentHP = 0
+            }
         })
-            this.canvas.addEventListener("click", (e) => {
+
+        this.canvas.addEventListener("click", (e) => {
             const rect = this.canvas.getBoundingClientRect()
             const mouseX = e.clientX - rect.left
             const mouseY = e.clientY - rect.top
@@ -34,17 +39,46 @@ export default class Battle {
                     return
                 }
             }
-            const buttons = [
-                { label: "COMBAT", x: w * 0.3, y: h * 0.68 },
-                { label: "SAC", x: w * 0.7, y: h * 0.68 },
-                { label: "POKEMON", x: w * 0.3, y: h * 0.84 },
-                { label: "FUITE", x: w * 0.7, y: h * 0.84 },
-            ]
-            
-            for (const btn of buttons) {
-                if (mouseX >= btn.x - bw/2 && mouseX <= btn.x + bw/2 &&
-                    mouseY >= btn.y - bh/2 && mouseY <= btn.y + bh/2) {
-                    this.handleButton(btn.label)
+
+            if (this.currentMenu === "bag") {
+                const slots = [
+                    { label: "heal",     x: w * 0.335, y: h * 0.69 },
+                    { label: "pokeball", x: w * 0.56,  y: h * 0.69 },
+                    { label: "status",   x: w * 0.335, y: h * 0.84 },
+                    { label: "boost",    x: w * 0.56,  y: h * 0.84 },
+                ]
+                const sw = w * 0.18
+                const sh = h * 0.1
+
+                for (const slot of slots) {
+                    this.ctx.strokeStyle = "red"
+                    this.ctx.lineWidth = 2
+                    this.ctx.strokeRect(slot.x - sw/2, slot.y - sh/2, sw, sh)
+                }
+
+                for (const slot of slots) {
+                    if (mouseX >= slot.x - sw/2 && mouseX <= slot.x + sw/2 &&
+                        mouseY >= slot.y - sh/2 && mouseY <= slot.y + sh/2) {
+                        if (slot.label === "pokeball") this.capture()
+                        else this.currentMenu = slot.label
+                    }
+                }
+                return
+            }
+
+            if (this.currentMenu === "main") {
+                const buttons = [
+                    { label: "COMBAT", x: w * 0.3, y: h * 0.68 },
+                    { label: "SAC",    x: w * 0.7, y: h * 0.68 },
+                    { label: "POKEMON", x: w * 0.3, y: h * 0.84 },
+                    { label: "FUITE",  x: w * 0.7, y: h * 0.84 },
+                ]
+                
+                for (const btn of buttons) {
+                    if (mouseX >= btn.x - bw/2 && mouseX <= btn.x + bw/2 &&
+                        mouseY >= btn.y - bh/2 && mouseY <= btn.y + bh/2) {
+                        this.handleButton(btn.label)
+                    }
                 }
             }
         })
@@ -59,6 +93,7 @@ export default class Battle {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${this.encounter.id}`)
         const data = await response.json()
         const stats = data.stats
+
         this.enemyMaxHP = stats.find(s => s.stat.name === "hp").base_stat
         this.enemyAttack = stats.find(s => s.stat.name === "attack").base_stat
         this.enemyDefense = stats.find(s => s.stat.name === "defense").base_stat
@@ -71,6 +106,20 @@ export default class Battle {
         this.slot_obj = await this.loadImage("./game/assets/battle/fond_objets.png")
         this.background = await this.loadImage("./game/assets/battle/bg_obj.png")
         this.attack = await this.loadImage("./game/assets/battle/green_attack_slot")
+
+        const teamResponse = await fetch("http://localhost:3000/api/team")
+        const team = await teamResponse.json()
+        if (team.length > 0) {
+            this.playerPokemon = team[0]
+            this.playerSprite = await this.loadImage(`./game/assets/pokemon/dp/back/${this.playerPokemon.id}.png`)
+
+            const playerResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${this.playerPokemon.id}`)
+            const playerData = await playerResponse.json()
+            const playerStats = playerData.stats
+            this.playerMaxHP = playerStats.find(s => s.stat.name === "hp").base_stat
+            this.playerCurrentHP = this.playerMaxHP
+            this.playerDisplayHP = this.playerMaxHP
+        }
     }
 
     loadImage(path) {
@@ -83,6 +132,27 @@ export default class Battle {
             resolve(null)
         }
         })
+    }
+
+    async capture() {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${this.encounter.id}`)
+        const data = await response.json()
+        console.log("moves bruts:", data.moves)
+        const moves = data.moves.slice(0, 4).map(m => m.move.name)
+        console.log("moves finaux:", moves)
+        console.log("body:", JSON.stringify({ pokemon: this.encounter.pokemon, id: this.encounter.id, niveau: this.encounter.niveau, moves: moves }))
+
+        await fetch("http://localhost:3000/api/team", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                pokemon: this.encounter.pokemon,
+                id: this.encounter.id,
+                niveau: this.encounter.niveau,
+                moves: moves
+            })
+        })
+        window.dispatchEvent(new CustomEvent("endBattle"))
     }
 
     drawButtons(ctx, w, h) {
@@ -127,20 +197,50 @@ export default class Battle {
     }
     drawObjects(ctx, w, h) {
     ctx.fillStyle = "#6b5f78"
-    ctx.fillRect(0, h * 0.6, w, h * 0.4)
+    ctx.fillRect(0, h * 0.55, w, h * 0.45)
 
-        if (this.slot_obj) {
-            ctx.drawImage(this.slot_obj, w * 0.1, h * 0.62, w * 0.6, h * 0.35)
-        }
-        
+    if (this.slot_obj) {
+        const imgW = w * 0.5
+        const imgH = h * 0.38
+        const imgX = (w - imgW) / 2
+        ctx.drawImage(this.slot_obj, imgX, h * 0.58, imgW, imgH)
     }
+
+    const slots = [
+        { label: "HEAL",     x: w * 0.335, y: h * 0.69 },
+        { label: "POKEBALL", x: w * 0.56,  y: h * 0.69 },
+        { label: "STATUS",   x: w * 0.335, y: h * 0.84 },
+        { label: "BOOST",    x: w * 0.56,  y: h * 0.84 },
+    ]
+
+    ctx.fillStyle = "white"
+    ctx.font = "bold 11px 'Press Start 2P'"
+    ctx.textAlign = "center"
+    for (const slot of slots) {
+        ctx.fillText(slot.label, slot.x, slot.y)
+    }
+    ctx.textAlign = "left"
+}
+
     drawAttacks(ctx, w, h) {
         ctx.fillStyle = "#6b5f78"
-        ctx.fillRect(0, h * 0.6, w, h * 0.4)
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
     }
     drawTeam(ctx, w, h) {
         ctx.fillStyle = "#6b5f78"
-        ctx.fillRect(0, h * 0.6, w, h * 0.4)
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
+    }
+    drawHeal(ctx, w, h) {
+        ctx.fillStyle = "#6b5f78"
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
+    }
+    drawStatus(ctx, w, h) {
+        ctx.fillStyle = "#6b5f78"
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
+    }
+    drawboost(ctx, w, h) {
+        ctx.fillStyle = "#6b5f78"
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
     }
 
     handleButton(label) {
@@ -173,9 +273,13 @@ export default class Battle {
         ctx.drawImage(this.pokemon_bar, w * 0.55, h * 0.38, 600, 120)
 
         ctx.fillStyle = "#2d5a1b"
-        ctx.fillRect(0, h * 0.6, w, h * 0.4)
+        ctx.fillRect(0, h * 0.55, w, h * 0.45)
         ctx.fillStyle = "#1a3a0f"
-        ctx.fillRect(0, h * 0.6, w, 4)
+        ctx.fillRect(0, h * 0.55, w, 4)
+
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 3
+        ctx.strokeRect(0, h * 0.55, w, h * 0.45)
 
         if (this.currentMenu === "main") this.drawButtons(ctx, w, h)
         else if (this.currentMenu === "bag") this.drawObjects(ctx, w, h)
@@ -186,20 +290,45 @@ export default class Battle {
     if (this.enemySprite  && this.enemyDisplayHP > 0) {
         ctx.drawImage(this.enemySprite, w * 0.62, h * 0.08, 220, 220)
     }
+    if (this.playerSprite) {
+        ctx.drawImage(this.playerSprite, w * 0.18, h * 0.28, 220, 220)
+
+        ctx.strokeStyle = "black"
+        ctx.lineWidth = 2
+        ctx.font = "bold 22px 'Press Start 2P'"
+        ctx.strokeText(this.playerPokemon.pokemon, w * 0.622, h * 0.4352)
+        ctx.fillStyle = "white"
+        ctx.fillText(this.playerPokemon.pokemon, w * 0.62, h * 0.435)
+
+        ctx.strokeText(`${this.playerPokemon.niveau}`, w * 0.812, h * 0.4352)
+        ctx.fillText(`${this.playerPokemon.niveau}`, w * 0.81, h * 0.435)
+    }
     
     ctx.strokeStyle = "black"
+    ctx.font = "bold 18px 'Press Start 2P'"
     ctx.lineWidth = 3
     ctx.strokeText(this.encounter.pokemon, w * 0.04, h * 0.09)
     ctx.strokeText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
     ctx.fillStyle = "white"
-    ctx.font = "bold 18px 'Press Start 2P'"
     ctx.fillText(this.encounter.pokemon, w * 0.04, h * 0.085)
     ctx.fillText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
 
+    if (this.playerMaxHP) {
+        const barX = w * 0.726
+        const barY = h * 0.458
+        const barMaxWidth = w * 0.1179
+        const barHeight = 7
+
+        const hpPercent = this.playerDisplayHP / this.playerMaxHP
+        const barColor = hpPercent > 0.5 ? "#00c800" : hpPercent > 0.2 ? "#f8d030" : "#f82800"
+
+        ctx.fillStyle = barColor
+        ctx.fillRect(barX, barY, barMaxWidth * hpPercent, barHeight)
+    }
     if (this.enemyMaxHP) {
-        const barX = w * 0.02 + 600 * 0.311
-        const barY = h * 0.04 + 120 * 0.535
-        const barMaxWidth = 600 * 0.305
+        const barX = w * 0.1177
+        const barY = h * 0.11
+        const barMaxWidth = w * 0.095
         const barHeight = 7
 
         const hpPercent = this.enemyDisplayHP / this.enemyMaxHP
@@ -215,7 +344,12 @@ export default class Battle {
             this.enemyDisplayHP -= 0.5
             if (this.enemyDisplayHP < this.enemyCurrentHP) this.enemyDisplayHP = this.enemyCurrentHP
         }
-        if (this.enemyCurrentHP <= 0 && this.enemyDisplayHP <= 0 && !this.battleEnded) {
+        if (this.playerDisplayHP > this.playerCurrentHP) {
+            this.playerDisplayHP -= 0.5
+            if (this.playerDisplayHP < this.playerCurrentHP) this.playerDisplayHP = this.playerCurrentHP
+        }
+        if ((this.enemyCurrentHP <= 0 && this.enemyDisplayHP <= 0 && !this.battleEnded) ||
+            (this.playerCurrentHP <= 0 && this.playerDisplayHP <= 0 && !this.battleEnded)) {
             this.battleEnded = true
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent("endBattle"))
