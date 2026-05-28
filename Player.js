@@ -221,8 +221,8 @@ class Player {
         this.inGrass = true
         this.lastGrassTileX = currentTileX
         this.lastGrassTileY = currentTileY
-        let encounters = Math.floor(Math.random()*7);
-        if (encounters == 5) {
+        let encounters = Math.floor(Math.random()*2);
+        if (encounters == 1) {
             for (const layer of this.map.layers) {
                 if (layer.name === "localisation") {
                     for (const obj of layer.objects) {
