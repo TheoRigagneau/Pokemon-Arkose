@@ -14,4 +14,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const encountersRouter = require('./routes/encounters');
 app.use('/api/encounters', encountersRouter);
 
+const teamRouter = require('./routes/team');
+app.use('/api/team', teamRouter);
+
 app.listen(3000, () => console.log('Serveur lancé sur le port 3000'));
