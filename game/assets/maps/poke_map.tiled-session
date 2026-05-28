@@ -7,15 +7,15 @@
     "fileStates": {
         "Boscalis.json": {
             "expandedObjectLayers": [
-                15,
                 9,
+                15,
                 10
             ],
-            "scale": 0.33,
-            "selectedLayer": 19,
+            "scale": 1.5,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 1062.121212121212,
-                "y": 1915.151515151515
+                "x": 558.3333333333333,
+                "y": 2174
             }
         },
         "C:/../../../Users/triga/hi_res_interior_general_tileset_by_akizakura16_d9qifn2.tsx": {
@@ -79,8 +79,8 @@
             "scale": 0.75,
             "selectedLayer": 4,
             "viewCenter": {
-                "x": 86,
-                "y": 476
+                "x": 240,
+                "y": 399.33333333333326
             }
         },
         "centre_pokemon.tmj": {
@@ -135,8 +135,8 @@
             "scale": 0.75,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 319.33333333333337,
-                "y": 238.66666666666669
+                "x": 232,
+                "y": 239.3333333333333
             }
         },
         "shop.tmj": {
