@@ -38,7 +38,7 @@ class Player {
         this.targetY = this.renderY;
         this.inBattle = false
 
-        this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false }
+        this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false, inventory : false }
 
 
 
@@ -49,6 +49,7 @@ class Player {
                 case "q"    : this.inputState.left = true; break;
                 case "d"    : this.inputState.right = true; break;
                 case "shift": this.inputState.run = true; break;
+                case "x" : this.inputState.inventory = true; break
                 case " ":
                     if (!this.inputState.interact) {
 

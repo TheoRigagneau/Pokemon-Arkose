@@ -105,7 +105,7 @@ export default class Battle {
         this.teamSlotBlack = await this.loadImage("./game/assets/battle/black_bc_team.png")
         this.slot_obj = await this.loadImage("./game/assets/battle/fond_objets.png")
         this.background = await this.loadImage("./game/assets/battle/bg_obj.png")
-        this.attack = await this.loadImage("./game/assets/battle/green_attack_slot")
+        this.attack = await this.loadImage("./game/assets/battle/attack_sprite.png")
 
         const teamResponse = await fetch("http://localhost:3000/api/team")
         const team = await teamResponse.json()
@@ -119,6 +119,8 @@ export default class Battle {
             this.playerMaxHP = playerStats.find(s => s.stat.name === "hp").base_stat
             this.playerCurrentHP = this.playerMaxHP
             this.playerDisplayHP = this.playerMaxHP
+            this.playerMoves = this.playerPokemon.moves
+            console.log(this.playerPokemon)
         }
     }
 
@@ -206,26 +208,57 @@ export default class Battle {
         ctx.drawImage(this.slot_obj, imgX, h * 0.58, imgW, imgH)
     }
 
-    const slots = [
-        { label: "HEAL",     x: w * 0.335, y: h * 0.69 },
-        { label: "POKEBALL", x: w * 0.56,  y: h * 0.69 },
-        { label: "STATUS",   x: w * 0.335, y: h * 0.84 },
-        { label: "BOOST",    x: w * 0.56,  y: h * 0.84 },
-    ]
-
-    ctx.fillStyle = "white"
-    ctx.font = "bold 11px 'Press Start 2P'"
-    ctx.textAlign = "center"
-    for (const slot of slots) {
-        ctx.fillText(slot.label, slot.x, slot.y)
-    }
-    ctx.textAlign = "left"
 }
 
     drawAttacks(ctx, w, h) {
         ctx.fillStyle = "#6b5f78"
         ctx.fillRect(0, h * 0.55, w, h * 0.45)
+
+        if (!this.playerPokemon?.moves) return
+
+        const positions = [
+            { x: w * 0.25, y: h * 0.685 },
+            { x: w * 0.75, y: h * 0.685 },
+            { x: w * 0.25, y: h * 0.865 },
+            { x: w * 0.75, y: h * 0.865 },
+        ]
+        const bw = w * 0.38
+        const bh = h * 0.13
+
+        for (let i = 0; i < this.playerPokemon.moves.length; i++) {
+            const bx = positions[i].x - bw / 2
+            const by = positions[i].y - bh / 2
+
+            ctx.fillStyle = "#1a5c1a"
+            ctx.beginPath()
+            ctx.roundRect(bx + 4, by + 6, bw, bh, 12)
+            ctx.fill()
+
+            ctx.fillStyle = "#2ea82e"
+            ctx.beginPath()
+            ctx.roundRect(bx, by, bw, bh, 12)
+            ctx.fill()
+
+            ctx.fillStyle = "rgba(255,255,255,0.2)"
+            ctx.beginPath()
+            ctx.roundRect(bx + 8, by + 4, bw - 16, bh * 0.35, 8)
+            ctx.fill()
+
+            ctx.fillStyle = "white"
+            ctx.font = "bold 12px 'Press Start 2P'"
+            ctx.textAlign = "center"
+            ctx.shadowColor = "rgba(0,0,0,0.5)"
+            ctx.shadowBlur = 4
+            ctx.fillText(
+                this.playerPokemon.moves[i].toUpperCase().replace(/-/g, ' '),
+                positions[i].x,
+                positions[i].y + 5
+            )
+            ctx.shadowBlur = 0
+        }
+        ctx.textAlign = "left"
     }
+
     drawTeam(ctx, w, h) {
         ctx.fillStyle = "#6b5f78"
         ctx.fillRect(0, h * 0.55, w, h * 0.45)
