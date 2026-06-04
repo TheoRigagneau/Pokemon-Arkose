@@ -15,4 +15,9 @@ router.post('/', async (req, res) => {
     res.json(newPokemon);
 });
 
+router.patch('/:id', async (req, res) => {
+    const pokemon = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    res.json(pokemon)
+})
+
 module.exports = router;

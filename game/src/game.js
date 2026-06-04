@@ -1,10 +1,11 @@
-import Player from "./Player.js";
-import Assets from "./Assets.js";
+import Player from "./Player.js"
+import Assets from "./Assets.js"
 import { ASSETS } from "./assets_config.js"
 import DialogBox from "./DialogBox.js"
 import Transition from "./animations/Transition.js"
 import zoneTransition from "./animations/zonetransition.js"
 import Battle from "./Battle.js"
+import Inventory from "./Inventory.js"
 
 class GameView {
     constructor() {
@@ -22,6 +23,15 @@ class GameView {
         this.transitionCanvas.height = window.innerHeight
         this.grassAnimations = [];
         
+        window.addEventListener("resize", () => {
+            this.canvas.width = window.innerWidth
+            this.canvas.height = window.innerHeight
+            this.uiCanvas.width = window.innerWidth
+            this.uiCanvas.height = window.innerHeight
+            this.transitionCanvas.width = window.innerWidth
+            this.transitionCanvas.height = window.innerHeight
+        })
+
     }
     async loadMap(path) {
         const ville1 = await fetch(path);
@@ -161,6 +171,8 @@ class GameView {
             this.battle.draw()
         } else {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+            this.ctx.fillStyle = "#1a1a1a"
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
             const zoom = 2
             const camX = this.canvas.width / (2 * zoom) - this.player.renderX
@@ -186,6 +198,7 @@ class GameView {
             this.transition.update();
             this.transition.draw(this.uiCtx, this.uiCanvas);
             this.dialogBox.draw();
+            this.inventory.draw();
             this.zoneTransition.update();
             this.zoneTransition.draw(this.uiCtx,this.transitionCanvas);
 
@@ -196,35 +209,65 @@ class GameView {
 
     async init() {
         window.game = game;
-        await this.loadMap("./game/assets/maps/Boscalis.json")
+        await this.loadMap("./assets/maps/Boscalis.json")
 
         this.assets = new Assets()
         for (const asset of ASSETS) {
             await this.assets.load(asset.key, asset.path)
         }
+        this.inventory = new Inventory(this.uiCanvas, this.uiCtx, this.assets)
+
+        this.uiCanvas.addEventListener("click", (e) => {
+            const rect = this.uiCanvas.getBoundingClientRect()
+            this.inventory.handleClick(e.clientX - rect.left, e.clientY - rect.top)
+        })
 
         this.tileset = this.assets.get("tileset");
 
-        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2","tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2","herbe"])
-        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"])
+        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre"])
+        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre"])
         this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
-                                                        "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe","tapis"])
-
+            "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis"])
         this.playerWalkSprite = this.assets.get("playerWalk");
         this.playerRunSprite = this.assets.get("playerRun");
         this.dialogBox = new DialogBox();
         this.zoneTransition = new zoneTransition();
         this.transition = new Transition();
-        this.player = new Player(1, "Joueur", "./game/assets/tilesets/png/npc_198_Lucas.png", [320, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
+        this.player = new Player(1, "Joueur", "./assets/tilesets/png/npc_198_Lucas.png", [672, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
+
+        window.addEventListener("keydown", (e) => {
+            if (this.inventory.isOpen) {
+                this.inventory.handleKey(e.key.toLowerCase())
+                return
+            }
+            if (e.key === "x" && !this.player.inBattle && !this.dialogBox.isOpen) {
+                const waitForStop = setInterval(() => {
+                    if (!this.player.isMoving) {
+                        clearInterval(waitForStop)
+                        this.inventory.toggle()
+                        this.player.inventoryOpen = this.inventory.isOpen
+                        this.player.inputState.up = false
+                        this.player.inputState.down = false
+                        this.player.inputState.left = false
+                        this.player.inputState.right = false
+                    }
+                }, 16)
+            }
+        })
+        window.addEventListener("inventoryClose", () => {
+            this.player.inventoryOpen = false
+        })
 
         window.addEventListener("changeMap", async (e) => {
+            console.log("spawn:", e.detail.spawnX, e.detail.spawnY, "destination:", e.detail.destination)
             this.transition.start(async () => {
                 this.dialogBox.isOpen = false
-                await this.loadMap(`./game/assets/maps/${e.detail.destination}.json`)
-                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2",'herbe'])
-                this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2"]);
+                await this.loadMap(`./assets/maps/${e.detail.destination}.json`)
+                console.log("calques dans la map:", this.map.layers.map(l => l.name))
+                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre"])
+                this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre"])
                 this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
-                                                        "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "muret", "transition","herbe"])
+                    "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis"])
                 this.player.map = this.map
                 this.player.renderX = e.detail.spawnX
                 this.player.renderY = e.detail.spawnY
@@ -258,6 +301,7 @@ class GameView {
             }, 16)
         })
         window.addEventListener("endBattle", () => {
+            if (this.battle) this.battle.destroy()
             this.battle = null
             this.player.inBattle = false
         })

@@ -48,8 +48,8 @@ class Player {
                 case "s"    : this.inputState.down = true; break;
                 case "q"    : this.inputState.left = true; break;
                 case "d"    : this.inputState.right = true; break;
+                case "x": this.inputState.inventory = true; break;
                 case "shift": this.inputState.run = true; break;
-                case "x" : this.inputState.inventory = true; break
                 case " ":
                     if (!this.inputState.interact) {
 
@@ -72,6 +72,7 @@ class Player {
                 case "s": this.inputState.down = false; break;
                 case "q": this.inputState.left = false; break;
                 case "d": this.inputState.right = false; break;
+                case "x": this.inputState.inventory = false; break;
                 case "shift": this.inputState.run = false; break;
                 case " ": this.inputState.interact = false; break;
             }
@@ -116,6 +117,11 @@ class Player {
         else if (this.direction === directions.west) checkX -= this.map.tilewidth
         else if (this.direction === directions.east) checkX += this.map.tilewidth
 
+        this.inputState.up = false
+        this.inputState.down = false
+        this.inputState.left = false
+        this.inputState.right = false
+
         for (const layer of this.map.layers) {
             if (layer.name === "interactions") {
                 for (const obj of layer.objects) {
@@ -133,7 +139,7 @@ class Player {
                                 
                             }))
                         }
-                        else if (info.type === "pancarte" || "eau" ||"statue") {
+                        else if (info.type === "pancarte" || info.type === "eau" || info.type === "statue") {
                             this.dialogBox.show(info.dialogue)
                         }
                         return
@@ -257,7 +263,13 @@ class Player {
     }
 
     async move() {
-        if (this.dialogBox.isOpen || this.inBattle) return
+        if (this.dialogBox.isOpen || this.inBattle ||this.inventoryOpen) return
+
+        if (!this._lastLog || Date.now() - this._lastLog > 1000) {
+            console.log("pos:", this.renderX, this.renderY)
+            this._lastLog = Date.now()
+        }
+
         const speed = this.inputState.run ? 4 : 2
         if (this.isMoving) {
             const dx = this.targetX - this.renderX
@@ -277,6 +289,7 @@ class Player {
         
 
         if (this.isOnGrass(this.renderX, this.renderY)) {
+            
             if (!this.inGrass || currentTileX !== this.lastGrassTileX || currentTileY !== this.lastGrassTileY) {
                const pokemon_encounter = this.Encounter(currentTileX, currentTileY)
                
