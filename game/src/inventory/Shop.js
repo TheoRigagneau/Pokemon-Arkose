@@ -28,11 +28,12 @@ export const ShopMixin = {
         ctx.fillText(`₽ ${this.walletAmount ?? "..."}`, w - 100, 40)
         ctx.textAlign = "left"
 
+        //items achetable
         const items = [
             { name: "Potion",   price: 300,  description: "Restaure 20 PV" },
             { name: "Pokéball", price: 200,  description: "Capture un Pokémon" },
         ]
-
+        //regarde la quantité de chaque item dans l'inventaire du joueur
         items.forEach((item, i) => {
              const inv = this.inventoryData.find(inv => inv.itemName === item.name)
             const quantity = inv?.quantity ?? 0
@@ -70,12 +71,14 @@ export const ShopMixin = {
     async buyItem(itemName, price) {
         if ((this.walletAmount ?? 0) < price) return
 
+        //mets a jour le portemonnaie du joueur
         await fetch("http://localhost:3000/api/wallet", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: -price })
         })
-
+        
+        //ajoute de 1 l'objet acheté
         await fetch("http://localhost:3000/api/inventory", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

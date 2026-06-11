@@ -1,6 +1,7 @@
 export const BattleLogicMixin = {
 
-    getBestEnemyMove() {
+    getBestEnemyMove() { 
+        //va calculer chaque dégats de chaque attaque et va renvoyer la meilleure
         let bestMove = this.enemyMoves[0]
         let bestDamage = 0
 
@@ -26,6 +27,7 @@ export const BattleLogicMixin = {
     },
 
     async getEffectiveness(moveType, defenderTypes) {
+        //calcul les dégats en fonctions des types
         let multiplier = 1
         const res = await fetch(`https://pokeapi.co/api/v2/type/${moveType}`)
         const data = await res.json()
@@ -40,21 +42,27 @@ export const BattleLogicMixin = {
     },
 
     async attack(moveName, isEnemy = false) {
+        //si c'est le poké adverse alors ça rajoute ennemi dans le texte
         const attacker = isEnemy ? `${this.encounter.pokemon} ennemi` : this.playerPokemon.pokemon
+        //récupère toute les stats du poké pour calculer les dégats
         const niveau = isEnemy ? this.encounter.niveau : this.playerPokemon.niveau
         const atk = isEnemy ? this.enemyAttack : this.playerAttack
         const atkSpe = isEnemy ? this.enemySpecialAttack : this.playerSpecialAttack
         const def = isEnemy ? this.playerDefense : this.enemyDefense
         const defSpe = isEnemy ? this.playerSpecialDefense : this.enemySpecialDefense
 
+        //regarde si l'attaque tappe sur le physique ou le spécial
         const isSpecial = isEnemy ? this.enemyMoveClass[moveName] === "special" : this.moveClass[moveName] === "special"
         const finalAtk = isSpecial ? atkSpe : atk
         const finalDef = isSpecial ? defSpe : def
 
+        //en fonction du type de l'attaque, regarde les types de chaques pokemon
         const moveType = isEnemy ? this.enemyMoveTypes[moveName] : this.moveTypes[moveName]
         const defenderTypes = isEnemy ? this.playerTypes : this.enemyTypes
         const attackerTypes = isEnemy ? this.enemyTypes : this.playerTypes
 
+        //via toute les infos ainsi que la puissance de base de l'attaque
+        //calcul le nombre de dégats fait par le pokémon
         const power = isEnemy ? this.enemyMovePower[moveName] : this.movePower[moveName]
         const effectiveness = await this.getEffectiveness(moveType, defenderTypes)
         const stab = attackerTypes?.includes(moveType) ? 1.5 : 1
@@ -64,6 +72,7 @@ export const BattleLogicMixin = {
 
         this.message = `${attacker} utilise ${moveName.replace(/-/g, ' ').toUpperCase()} !`
 
+        //baisse de la vie en fonction du poké attaqué
         if (isEnemy) {
             this.playerCurrentHP -= damage
             if (this.playerCurrentHP < 0) this.playerCurrentHP = 0
@@ -73,9 +82,18 @@ export const BattleLogicMixin = {
         }
 
         await new Promise(r => setTimeout(r, 1000))
+        
+        if (effectiveness > 1) {
+            this.message = "C'est super efficace !"
+        }
 
-        if (effectiveness > 1) this.message = "C'est super efficace !"
-        else if (effectiveness < 1) this.message = "Ce n'est pas très efficace..."
+        else if (effectiveness > 0 && effectiveness < 1) {
+            this.message = "Ce n'est pas très efficace..."
+        }
+
+        else if (effectiveness = 0) {
+            this.message = "C'est inefficace"
+        }
         await new Promise(r => setTimeout(r, 1000))
     },
 
@@ -90,6 +108,7 @@ export const BattleLogicMixin = {
         const playerFirst = this.playerSpeed >= this.enemySpeed
         const enemyMove = this.getBestEnemyMove()
 
+        //en fonction de la vitesse des deux poké, regarde qui attaque en premier
         if (playerFirst) {
             await this.attack(moveName, false)
             if (this.enemyCurrentHP > 0) await this.attack(enemyMove, true)
@@ -103,10 +122,10 @@ export const BattleLogicMixin = {
     },
 
     async loadNextTrainerPokemon(poke) {
-
+        //récupère les infos du prochains pokemon du dresseur
         const calcStat = (base, niveau) => Math.floor((2 * base * niveau) / 100) + 5
         const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
-        this.enemySprite = await this.loadImage(`./assets/pokemon/dp/shiny/${poke.id}.png`)
+        this.enemySprite = await this.loadImage(`./assets/pokemon/dp/${poke.id}.png`)
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
         const data = await res.json()
 
@@ -122,14 +141,10 @@ export const BattleLogicMixin = {
         this.enemyDisplayHP      = this.enemyMaxHP
         this.enemyCurrentHP      = this.enemyMaxHP
 
-        this.enemyMoves = data.moves.filter(m => m.version_group_details.some(
-            v => v.move_learn_method.name === "level-up" &&
-                v.level_learned_at <= poke.niveau &&
-                v.level_learned_at > 0
-        )).map(m => m.move.name).slice(0, 4)
-        if (this.enemyMoves.length === 0) {
-            this.enemyMoves = data.moves.slice(0, 1).map(m => m.move.name)
-        }
+        //donen 4 moves au poké adverse
+        this.enemyMoves = data.moves.filter(m => m.version_group_details.some(v => v.move_learn_method.name === "level-up" 
+            && v.level_learned_at <= poke.niveau && v.level_learned_at > 0 )).map(m => m.move.name).slice(0, 4)
+
         this.enemyMovePower = {}
         this.enemyMoveClass = {}
         this.enemyMoveTypes = {}

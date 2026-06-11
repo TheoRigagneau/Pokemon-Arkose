@@ -45,6 +45,7 @@ class GameView {
     canvas.width = this.map.width * this.map.tilewidth;
     canvas.height = this.map.height * this.map.tileheight;
     const ctx =canvas.getContext("2d")
+    //en fonction des infos de tiles, réalise des action
     for (const layer of this.map.layers) {
             if (layer.type === "tilelayer" && !excludedLayers.includes(layer.name)) {
                 const startTileX = 0;
@@ -67,6 +68,8 @@ class GameView {
 
                             const tilesetInfo = [...this.map.tilesets].reverse().find(ts => tileId >= ts.firstgid)
                             if (tilesetInfo) {
+
+                                //load les sprites des tilesheets
                                 const source = tilesetInfo.source
                                 if (source.includes("house2")) {
                                     tileset = this.assets.get("house2")
@@ -98,11 +101,13 @@ class GameView {
     drawDynamicLayers() {
         for (const layer of this.map.layers) {
             if (layer.name === "fleur" || layer.name === "fleur2") {
+                //tuilles visible à l'écran
                 const startTileX = Math.max(0,Math.floor((this.player.renderX - this.canvas.width / 2) / this.map.tilewidth));
                 const endTileX = Math.min(this.map.width,Math.ceil((this.player.renderX + this.canvas.width / 2) / this.map.tilewidth));
                 const startTileY = Math.max(0,Math.floor((this.player.renderY - this.canvas.height / 2) / this.map.tileheight));
                 const endTileY = Math.min(this.map.height, Math.ceil((this.player.renderY + this.canvas.height / 2) / this.map.tileheight));
                 
+                //dessine ces tuilles
                 for (let line = startTileY; line < endTileY; line++) {
                     for (let column = startTileX; column < endTileX; column++) {
                         const i = line * this.map.width + column
@@ -146,9 +151,14 @@ class GameView {
         for (const layer of this.map.layers) {
             if (layer.name === "PNJ") {
                 for (const obj of layer.objects) {
+                    const props = Object.fromEntries(obj.properties?.map(p => [p.name, p.value]) ?? [])
+                    if (this.trainerWalkAnim && props.pnjID == this.trainerWalkAnim.pnjID) continue
+
                     const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
                     const direction = obj.properties?.find(p => p.name === "direction")?.value ?? "south"
                     const sprite = this.assets.get(spriteKey)
+
+                    //ou regarde le pnj
                     if (sprite) {
                         const directionRow = {
                             south: 3,
@@ -163,8 +173,27 @@ class GameView {
                 }
             }
         }
+        if (this.trainerWalkAnim) {
+            //déplacement du dresseur
+            const sprite = this.assets.get(this.trainerWalkAnim.spriteKey)
+            if (sprite) {
+                const dx = this.trainerWalkAnim.targetX - this.trainerWalkAnim.x
+                const dy = this.trainerWalkAnim.targetY - this.trainerWalkAnim.y
+                let row = 0
+                if (Math.abs(dy) > Math.abs(dx)) {
+                    row = dy > 0 ? 0 : 3
+                } else {
+                    row = dx > 0 ? 1 : 2
+                }
+                this.ctx.drawImage(sprite, 0, row * 64, 64, 64,
+                    this.trainerWalkAnim.x - 32,
+                    this.trainerWalkAnim.y - 32,
+                    64, 64)
+            }
+        }
     }
     drawGrassAnimations() {
+        //déplacement de l'herbe pour avoir une animation
         for (const anim of this.grassAnimations) {
             anim.timer = (anim.timer || 0) + 1
             if (anim.timer % 4 === 0) {
@@ -176,7 +205,11 @@ class GameView {
         }
         this.grassAnimations = this.grassAnimations.filter(a => a.timer < 32)
     }
+
     gameLoop() {
+        //boucle pour faire tourner le jeu
+
+        //écran de démarage
         if (this.waitingForInteraction) {
             this.ctx.fillStyle = "#1a1a2e"
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
@@ -188,12 +221,17 @@ class GameView {
             requestAnimationFrame(() => this.gameLoop())
             return
         }
+
+        //dessine la page battle
         if (this.battle) {
             this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
             this.trCtx.clearRect(0, 0, this.transitionCanvas.width, this.transitionCanvas.height)
             this.battle.update()
             this.battle.draw()
-        } else {
+        } 
+        
+        //dessine la map en elle-même
+        else {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
             this.ctx.fillStyle = "#1a1a1a"
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
@@ -245,6 +283,7 @@ class GameView {
         for (const asset of ASSETS) {
             await this.assets.load(asset.key, asset.path)
         }
+
         this.tileset = this.assets.get("tileset")
 
         const saveRes = await fetch("http://localhost:3000/api/save")
@@ -252,6 +291,7 @@ class GameView {
 
         this.inventory = new Inventory(this.uiCanvas, this.uiCtx, this.assets)
 
+        //regarde s'il y a une save pour la reprendre
         if (save) {
             await this.loadMap(`./assets/maps/${save.map}.json`)
             this.currentMap = save.map
@@ -259,13 +299,19 @@ class GameView {
                 this.audio.setVolume(save.volume)
                 this.inventory.settingsVolume = save.volume
             }
-        } else {
+        } 
+        
+
+        else {
             await this.loadMap("./assets/maps/Boscalis.json")
             this.currentMap = "Boscalis"
         }
 
+        //objets sous le joueur
         this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre", "muret", "pokeball"])
+        //même niveau que le joueur
         this.offscreenTop    = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre", "pokeball"])
+        //au dessus du joueur
         this.offscreenUp     = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis", "muret"])
 
         this.playerWalkSprite = this.assets.get("playerWalk")
@@ -276,14 +322,16 @@ class GameView {
 
         const startX = save ? save.x : 672
         const startY = save ? save.y : 2144
+        //création du perso
         this.player = new Player(1, "Joueur", "./assets/tilesets/png/npc_198_Lucas.png", [startX, startY], this.map, this.dialogBox, this.transition, this.zoneTransition)
         if (save) this.player.direction = save.direction
 
-
+        //récupère les coordonnées du clique
         this.uiCanvas.addEventListener("click", (e) => {
             const rect = this.uiCanvas.getBoundingClientRect()
             this.inventory.handleClick(e.clientX - rect.left, e.clientY - rect.top)
         })
+
 
         window.addEventListener("keydown", (e) => {
             if (this.waitingForInteraction && e.key === " ") {
@@ -297,6 +345,7 @@ class GameView {
                 return
             }
 
+            //attend la fin du déplacement du perso
             if (e.key === "x" && !this.player.inBattle && !this.dialogBox.isOpen) {
                 const waitForStop = setInterval(() => {
                     if (!this.player.isMoving) {
@@ -321,8 +370,11 @@ class GameView {
                 this.currentMap = e.detail.destination
                 this.dialogBox.isOpen = false
                 await this.loadMap(`./assets/maps/${e.detail.destination}.json`)
+                //objets sous le joueur
                 this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre", "muret", "pokeball"])
+                //même niveau que le joueur
                 this.offscreenTop    = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre", "pokeball"])
+                //au dessus du joueur
                 this.offscreenUp     = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis", "muret"])
                 this.player.map = this.map
                 this.player.renderX = e.detail.spawnX
@@ -335,6 +387,7 @@ class GameView {
             }
         })
 
+        //animation de l'herbe
         window.addEventListener("grassStep", (e) => {
             const exists = this.grassAnimations.find(a => a.tileX === e.detail.tileX && a.tileY === e.detail.tileY)
             if (!exists) {
@@ -343,58 +396,92 @@ class GameView {
         })
 
         window.addEventListener("startbattle", async (e) => {
+            //ajoute le pokemon au pokedex
             await fetch("http://localhost:3000/api/pokedex", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ pokemonId: e.detail.id, pokemon: e.detail.pokemon })
             })
-            this.audio.play("wild")
             this.zoneTransition.active = false
             this.currentEncounter = { pokemon: e.detail.pokemon, id: e.detail.id, niveau: e.detail.niveau }
-            const waitForMove = setInterval(() => {
-                if (!this.player.isMoving) {
-                    clearInterval(waitForMove)
-                    this.player.inBattle = true
-                    this.transition.start(async () => {
-                        this.battle = new Battle(this.ctx, this.canvas, this.currentEncounter)
-                        await this.battle.init()
-                    })
-                }
-            }, 16)
+            this.player.inBattle = true
+            //lance le combat
+            this.audio.play("wild")
+            this.transition.start(async () => {
+                this.battle = new Battle(this.ctx, this.canvas, this.currentEncounter)
+                await this.battle.init()
+            })
         })
 
         window.addEventListener("trainerBattle", async (e) => {
             if (this.player.inBattle) return
+            this.player.inBattle = true
             this.audio.play("trainer")
-
             this.currentTrainerId = e.detail.pnjID
+            //récupère les infos du trainers en fonction de son id
+
+            let trainerObj = null
+            for (const layer of this.map.layers) {
+                if (layer.name === "PNJ") {
+                    //via l'id, anime le déplacement du pnj
+                    trainerObj = layer.objects.find(obj => {
+                        const props = Object.fromEntries(obj.properties?.map(p => [p.name, p.value]) ?? [])
+                        return props.pnjID == e.detail.pnjID
+                    })
+                }
+            }
+
+            if (trainerObj) {
+                //crée l'animation
+                this.trainerWalkAnim = {
+                    x: trainerObj.x,
+                    y: trainerObj.y,
+                    targetX: this.player.renderX,
+                    targetY: this.player.renderY,
+                    spriteKey: trainerObj.properties?.find(p => p.name === "sprite")?.value,
+                    pnjID: e.detail.pnjID
+                }
+
+                await new Promise(resolve => {
+                    const walk = setInterval(() => {
+                        const dx = this.trainerWalkAnim.targetX - this.trainerWalkAnim.x
+                        const dy = this.trainerWalkAnim.targetY - this.trainerWalkAnim.y
+                        const dist = Math.sqrt(dx * dx + dy * dy)
+
+                        if (dist <= 32) {
+                            clearInterval(walk)
+                            resolve()
+                            return
+                        }
+
+                        this.trainerWalkAnim.x += (dx / dist) * 2
+                        this.trainerWalkAnim.y += (dy / dist) * 2
+                    }, 16)
+                })
+            }
+
+            //récupère le premier pokemon du dresseur
             const firstPoke = e.detail.pokemons[0]
-            
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${firstPoke.id}`)
             const data = await res.json()
             const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
 
-            const waitForMove = setInterval(() => {
-                if (!this.player.isMoving) {
-                    clearInterval(waitForMove)
-                    this.player.inBattle = true
-                    setTimeout(() => {
-                        this.transition.start(async () => {
-                            this.battle = new Battle(this.ctx, this.canvas, {
-                                pokemon: capitalize(data.name),
-                                id: firstPoke.id,
-                                niveau: firstPoke.niveau,
-                                isTrainer: true,
-                                trainerPokemons: e.detail.pokemons,
-                                currentTrainerPokeIndex: 0
-                            })
-                            await this.battle.init()
-                        })
-                    }, 1000)
-                }
-            }, 16)
+            setTimeout(() => {
+                this.transition.start(async () => {
+                    this.battle = new Battle(this.ctx, this.canvas, {
+                        pokemon: capitalize(data.name),
+                        id: firstPoke.id,
+                        niveau: firstPoke.niveau,
+                        isTrainer: true,
+                        trainerPokemons: e.detail.pokemons,
+                        currentTrainerPokeIndex: 0
+                    })
+                    await this.battle.init()
+                })
+            }, 500)
         })
 
+        //termine le combat
         window.addEventListener("endBattle", async () => {
             if (this.battle) this.battle.destroy()
             if (this.currentTrainerId) {
@@ -410,6 +497,7 @@ class GameView {
             this.audio.play("map")
         })
 
+        //soigne l'équipe
         window.addEventListener("healTeam", async () => {
             const response = await fetch("http://localhost:3000/api/team")
             const team = await response.json()
@@ -425,6 +513,7 @@ class GameView {
             }
         })
 
+        //ouvre la page shop
         window.addEventListener("openShop", async () => {
             await this.inventory.fetchWallet()
             await this.inventory.fetchInventory()
@@ -433,18 +522,26 @@ class GameView {
             this.player.inventoryOpen = true
         })
 
+        
         window.addEventListener("starterChosen", async (e) => {
+            //récupère le starter choisi
             const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
             const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${e.detail.name.toLowerCase()}`)
             const data = await response.json()
+            //stats et moove du pokemon
+
             const moves = data.moves.slice(0, 4).map(m => m.move.name)
-            const maxHP = data.stats.find(s => s.stat.name === "hp").base_stat
-            console.log("maxHP:", maxHP)
+            const baseHP = data.stats.find(s => s.stat.name === "hp").base_stat
+            const maxHP = Math.floor((2 * baseHP * 5) / 100) + 5 + 10
+
+            //le mets dans la team
             await fetch("http://localhost:3000/api/team", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ pokemon:  capitalize(data.name), id: data.id, niveau: 5, moves, xp: 0, currentHP: maxHP, maxHP })
             })
+
+            //considère comem starter (permet de ne pas en prendre un autre)
             await fetch("http://localhost:3000/api/starter", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -452,6 +549,7 @@ class GameView {
             })
         })
 
+        //ouvre le pc
         window.addEventListener("openPC", async () => {
             await this.inventory.fetchTeam()
             await this.inventory.fetchPC()
@@ -460,6 +558,7 @@ class GameView {
             this.player.inventoryOpen = true
         })
 
+        //sauvegarde
         window.addEventListener("saveGame", async () => {
             await fetch("http://localhost:3000/api/save", {
                 method: "POST",
@@ -474,8 +573,14 @@ class GameView {
             })
         })
 
+        //modifier le volume
         window.addEventListener("volumeChange", (e) => {
             this.audio.setVolume(e.detail.volume)
+        })
+
+        //joueur a plus de poké en vie
+        window.addEventListener("playerDefeated", () => {
+            window.location.reload()
         })
 
         this.gameLoop()

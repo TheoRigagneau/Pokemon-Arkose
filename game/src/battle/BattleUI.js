@@ -1,6 +1,7 @@
 export const BattleUIMixin = {
 
     draw() {
+        //crée la map de base
         if (!this.field || !this.platform || !this.enemy_hp_bar || !this.pokemon_bar || !this.ready) return
         
         const ctx = this.ctx
@@ -13,10 +14,10 @@ export const BattleUIMixin = {
         ctx.fillRect(0, 0, w, h)
         ctx.drawImage(this.field, 0, 0, w, h * 0.6)
 
-        ctx.drawImage(this.platform,     w * 0.48, h * 0.2,  800, 100)
-        ctx.drawImage(this.enemy_hp_bar, w * 0.02, h * 0.04, 600, 120)
-        ctx.drawImage(this.platform,     w * 0.02, h * 0.42, 900, 100)
-        ctx.drawImage(this.pokemon_bar,  w * 0.55, h * 0.38, 600, 120)
+        ctx.drawImage(this.platform,     w * 0.48, h * 0.2,  w * 0.5,  h * 0.15)
+        ctx.drawImage(this.enemy_hp_bar, w * 0.02, h * 0.04, w * 0.4,  h * 0.18)
+        ctx.drawImage(this.platform,     w * 0.02, h * 0.42, w * 0.62, h * 0.15)
+        ctx.drawImage(this.pokemon_bar,  w * 0.55, h * 0.38, w * 0.42, h * 0.18)
 
         ctx.fillStyle = "#2d5a1b"
         ctx.fillRect(0, h * 0.55, w, h * 0.45)
@@ -29,49 +30,60 @@ export const BattleUIMixin = {
         if (this.currentMenu === "main") {
             this.drawMessage(ctx, w, h)
             this.drawButtons(ctx, w, h)
-        } else if (this.currentMenu === "fight") {
+        } 
+
+        else if (this.currentMenu === "fight") {
             this.drawAttacks(ctx, w, h)
             this.drawMessage(ctx, w, h)
-        } else if (this.currentMenu === "bag") {
+        } 
+        
+        else if (this.currentMenu === "bag") {
             this.drawObjects(ctx, w, h)
             return
-        } else if (this.currentMenu === "pokemon") {
+        } 
+        
+        else if (this.currentMenu === "pokemon") {
             this.drawTeam(ctx, w, h)
             return
         }
-
+        //sprite des deux pokémons
         if (this.enemySprite && this.enemyDisplayHP > 0) {
-            ctx.drawImage(this.enemySprite, w * 0.62, h * 0.08, 220, 220)
+            ctx.drawImage(this.enemySprite,  w * 0.65, h * 0.07, h * 0.3,  h * 0.3)
         }
         if (this.playerSprite) {
-            ctx.drawImage(this.playerSprite, w * 0.18, h * 0.28, 220, 220)
+            ctx.drawImage(this.playerSprite, w * 0.27, h * 0.28, h * 0.3,  h * 0.3)
         }
 
         ctx.strokeStyle = "black"
         ctx.font = "bold 18px 'Press Start 2P'"
         ctx.lineWidth = 3
-        ctx.strokeText(this.encounter.pokemon, w * 0.04, h * 0.09)
-        ctx.strokeText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
         ctx.fillStyle = "white"
-        ctx.fillText(this.encounter.pokemon, w * 0.04, h * 0.085)
-        ctx.fillText(`${this.encounter.niveau}`, w * 0.188, h * 0.085)
+        //info du pokémon advers
+        ctx.strokeText(this.encounter.pokemon, w * 0.05, h * 0.107)
+        ctx.fillText(this.encounter.pokemon, w * 0.049, h * 0.106)
+        ctx.fillStyle = "white"
+        ctx.strokeText(`${this.encounter.niveau}`, w * 0.237, h * 0.107)
+        ctx.fillText(`${this.encounter.niveau}`, w * 0.236, h * 0.106)
+        
 
         if (this.playerSprite) {
             ctx.strokeStyle = "black"
             ctx.lineWidth = 2
             ctx.font = "bold 22px 'Press Start 2P'"
-            ctx.strokeText(this.playerPokemon.pokemon, w * 0.622, h * 0.4352)
+            //info du pokémon du joueur
+            ctx.strokeText(this.playerPokemon.pokemon, w * 0.65, h * 0.447)
             ctx.fillStyle = "white"
-            ctx.fillText(this.playerPokemon.pokemon, w * 0.62, h * 0.435)
-            ctx.strokeText(`${this.playerPokemon.niveau}`, w * 0.812, h * 0.4352)
-            ctx.fillText(`${this.playerPokemon.niveau}`, w * 0.81, h * 0.435)
+            ctx.fillText(this.playerPokemon.pokemon, w * 0.653, h * 0.446)
+            ctx.strokeText(`${this.playerPokemon.niveau}`, w * 0.906, h * 0.454)
+            ctx.fillText(`${this.playerPokemon.niveau}`, w * 0.904, h * 0.453)
         }
 
         if (this.playerMaxHP) {
-            const barX = w * 0.766
-            const barY = h * 0.458
-            const barMaxWidth = w * 0.1179
-            const barHeight = 7
+            //barre d'hp du pokemon du joueur full vie
+            const barX = w * 0.786
+            const barY = h * 0.482
+            const barMaxWidth = w * 0.163
+            const barHeight = 6.6
             const hpPercent = this.playerDisplayHP >= this.playerMaxHP ? 1 : this.playerDisplayHP / this.playerMaxHP
             const barColor = hpPercent > 0.5 ? "#00c800" : hpPercent > 0.2 ? "#f8d030" : "#f82800"
             ctx.fillStyle = barColor
@@ -79,6 +91,7 @@ export const BattleUIMixin = {
         }
 
         if (this.playerPokemon?.xp !== undefined) {
+            //barre d'xp de notre pokémon
             const currentLevel = this.playerPokemon.niveau
             const xpNeeded = Math.pow(currentLevel + 1, 2) * 5
             const xpProgress = this.playerXpDisplay / xpNeeded
@@ -91,10 +104,11 @@ export const BattleUIMixin = {
         }
 
         if (this.enemyMaxHP) {
-            const barX = w * 0.1177
-            const barY = h * 0.11
-            const barMaxWidth = w * 0.095
-            const barHeight = 7
+            //barre du poké adverse full vie
+            const barX = w * 0.144
+            const barY = h * 0.139
+            const barMaxWidth = w * 0.122
+            const barHeight = 6
             const hpPercent = this.enemyDisplayHP / this.enemyMaxHP
             const barColor = hpPercent > 0.5 ? "#00c800" : hpPercent > 0.2 ? "#f8d030" : "#f82800"
             ctx.fillStyle = barColor
@@ -102,12 +116,16 @@ export const BattleUIMixin = {
         }
 
         if (this.animating) {
+            //crée un waiting screen le temps du tour
             if (this.waitingScreen) {
                 ctx.drawImage(this.waitingScreen, 0, h * 0.55, w, h * 0.45)
-            } else {
+            } 
+            
+            else {
                 ctx.fillStyle = "#1a1a2e"
                 ctx.fillRect(0, h * 0.55, w, h * 0.45)
             }
+
             ctx.fillStyle = "#1a3a0f"
             ctx.fillRect(0, h * 0.55, w, 4)
             ctx.strokeStyle = "white"
@@ -115,11 +133,12 @@ export const BattleUIMixin = {
             ctx.strokeRect(0, h * 0.55, w, h * 0.45)
             this.drawMessage(ctx, w, h)
         }
-    if (this.pendingMove) {
-        this.drawLearnMove(ctx, w, h)
-    }
+        //lance la page pour apprendre une attaque
+        if (this.pendingMove) {
+            this.drawLearnMove(ctx, w, h)
+        }
     },
-
+    //fait la dialogbox sur laquelle on voit les infos du combat
     drawMessage(ctx, w, h) {
         const boxH = h * 0.12
         const boxX = w * 0.02
@@ -150,7 +169,7 @@ export const BattleUIMixin = {
             boxX + 16, boxY + boxH / 2 + 6
         )
     },
-
+    //boutons permettant de se déplacer
     drawButtons(ctx, w, h) {
         const isTrainer = this.encounter.isTrainer
         const buttons = [
@@ -191,7 +210,7 @@ export const BattleUIMixin = {
             ctx.textAlign = "left"
         }
     },
-
+    //sac
     drawObjects(ctx, w, h) {
         ctx.fillStyle = "#f0ede0"
         ctx.fillRect(0, 0, w, h)
@@ -201,11 +220,12 @@ export const BattleUIMixin = {
         ctx.textAlign = "center"
         ctx.fillText("SAC", w / 2, h * 0.06)
         ctx.textAlign = "left"
-
+        //objet de heal
         const healItems = this.inventory?.filter(inv => {
             const item = this.items?.find(i => i.name === inv.itemName)
             return item?.type === "heal" || item?.type === "revive" || item?.type === "candy"}) ?? []
 
+        //pokeball
         const ballItems = this.inventory?.filter(inv => {
             const item = this.items?.find(i => i.name === inv.itemName)
             return item?.type === "pokeball"}) ?? []
@@ -216,7 +236,8 @@ export const BattleUIMixin = {
 
         ctx.fillStyle = "#4080d0"
         ctx.fillText("POKÉBALLS", w * 0.55, h * 0.14)
-
+        
+        //crée les cases pour chaque objet de soin
         healItems.forEach((inv, i) => {
             const item = this.items.find(it => it.name === inv.itemName)
             const x = w * 0.04
@@ -242,36 +263,37 @@ export const BattleUIMixin = {
             ctx.fillText(`x${inv.quantity}`, x + w * 0.42 - 12, y + h * 0.055)
             ctx.textAlign = "left"
         })
+        //crée les cases pour les balls si le joueur n'est pas en combat
+        if (!this.encounter.isTrainer) {
+            ballItems.forEach((inv, i) => {
+                const item = this.items.find(it => it.name === inv.itemName)
+                const x = w * 0.54
+                const y = h * 0.2 + i * h * 0.12
 
-        ballItems.forEach((inv, i) => {
-            const item = this.items.find(it => it.name === inv.itemName)
-            const x = w * 0.54
-            const y = h * 0.2 + i * h * 0.12
+                ctx.fillStyle = "#ffffff"
+                ctx.beginPath()
+                ctx.roundRect(x, y, w * 0.42, h * 0.1, 10)
+                ctx.fill()
+                ctx.strokeStyle = "#4080d0"
+                ctx.lineWidth = 2
+                ctx.beginPath()
+                ctx.roundRect(x, y, w * 0.42, h * 0.1, 10)
+                ctx.stroke()
 
-            ctx.fillStyle = "#ffffff"
-            ctx.beginPath()
-            ctx.roundRect(x, y, w * 0.42, h * 0.1, 10)
-            ctx.fill()
-            ctx.strokeStyle = "#4080d0"
-            ctx.lineWidth = 2
-            ctx.beginPath()
-            ctx.roundRect(x, y, w * 0.42, h * 0.1, 10)
-            ctx.stroke()
-
-            ctx.fillStyle = "#2a2a2a"
-            ctx.font = "bold 11px 'Press Start 2P'"
-            ctx.fillText(inv.itemName, x + 12, y + h * 0.038)
-            ctx.font = "9px 'Press Start 2P'"
-            ctx.fillStyle = "#666"
-            ctx.font = "bold 11px 'Press Start 2P'"
-            ctx.textAlign = "right"
-            ctx.fillText(`x${inv.quantity}`, x + w * 0.42 - 12, y + h * 0.055)
-            ctx.textAlign = "left"
-        })
-
+                ctx.fillStyle = "#2a2a2a"
+                ctx.font = "bold 11px 'Press Start 2P'"
+                ctx.fillText(inv.itemName, x + 12, y + h * 0.038)
+                ctx.font = "9px 'Press Start 2P'"
+                ctx.fillStyle = "#666"
+                ctx.font = "bold 11px 'Press Start 2P'"
+                ctx.textAlign = "right"
+                ctx.fillText(`x${inv.quantity}`, x + w * 0.42 - 12, y + h * 0.055)
+                ctx.textAlign = "left"
+            })
+        }
         if (this.back) ctx.drawImage(this.back, w * 0.91, h * 0.02, w * 0.08, h * 0.06)
     },
-
+    //boutons attaques coloré en fonction du type de l'attaque
     drawAttacks(ctx, w, h) {
         ctx.fillStyle = "#6b5f78"
         ctx.fillRect(0, h * 0.55, w, h * 0.45)
@@ -353,7 +375,7 @@ export const BattleUIMixin = {
             ctx.drawImage(this.back, backX, backY, backW, backH)
         }
     },
-
+    //page apprendre une attaque
     drawLearnMove(ctx, w, h) {
         ctx.fillStyle = "rgba(0,0,0,0.85)"
         ctx.fillRect(0, 0, w, h)
@@ -369,7 +391,7 @@ export const BattleUIMixin = {
         const moves = [...this.playerPokemon.moves, "NE PAS APPRENDRE"]
         const bw = w * 0.4
         const bh = h * 0.09
-
+        //cases avec mes attaques et un bouton ne pas apprendre
         moves.forEach((move, i) => {
             const x = w / 2 - bw / 2
             const y = h * 0.45 + i * (bh + 10)

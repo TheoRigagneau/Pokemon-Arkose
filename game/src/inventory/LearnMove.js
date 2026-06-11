@@ -1,5 +1,5 @@
 export const LearnMoveMixin = {
-
+    //page qui apparait pour qu'un poke apprenne un moove
     drawLearnMove() {
         const ctx = this.ctx
         const w = this.canvas.width

@@ -1,5 +1,5 @@
 export const BattleTeamMixin = {
-
+    //fait les slots de la team en fonction des pokés morts et des slots vides
     drawSlot(ctx, x, y, w, h, isActive = false) {
         const radius = 16
         
@@ -34,7 +34,7 @@ export const BattleTeamMixin = {
     },
 
     drawTeam(ctx, w, h) {
-
+        //crée la page team
         const item = this.selectedItem ? this.items?.find(i => i.name === this.selectedItem.itemName) : null
 
         ctx.fillStyle = "#1a1a2e"
@@ -47,7 +47,7 @@ export const BattleTeamMixin = {
         ctx.textAlign = "left"
 
         if (!this.teamData) return
-
+        //bouton cliquable pour aller sur le pokémon
         const slots = [
             { x: w * 0.02, y: h * 0.1 },
             { x: w * 0.52, y: h * 0.1 },
@@ -62,7 +62,7 @@ export const BattleTeamMixin = {
         for (let i = 0; i < 6; i++) {
             const slot = slots[i]
             const poke = this.teamData[i]
-
+            //slot vide
             if (!poke) {
                 this.drawSlot(ctx, slot.x, slot.y, sw, sh, false)
                 continue
@@ -75,11 +75,13 @@ export const BattleTeamMixin = {
                 (item.type === "revive" && isDead)
 
             ctx.globalAlpha = isUsable ? 1.0 : 0.4
+            //slot en fonction de l'état du pokémon
             this.drawSlot(ctx, slot.x, slot.y, sw, sh, isUsable && !isDead)
 
             const spriteSize = sh * 0.85
             const sprite = this.teamSprites?.[poke.id]
-            if (sprite) ctx.drawImage(sprite, slot.x + 8, slot.y + sh * 0.08, spriteSize, spriteSize)
+            //sprite des poke
+            ctx.drawImage(sprite, slot.x + 8, slot.y + sh * 0.08, spriteSize, spriteSize)
 
             const textX = slot.x + spriteSize + 16
             ctx.fillStyle = "white"
@@ -118,7 +120,7 @@ export const BattleTeamMixin = {
             this.drawPokemonDetail(ctx, w, h, this.selectedPokemon)
         }
     },
-
+    //page sur laquelle on voit les infos du poké
     drawPokemonDetail(ctx, w, h, poke) {
         ctx.fillStyle = "#1a1a2e"
         ctx.fillRect(0, 0, w, h)
@@ -142,7 +144,7 @@ export const BattleTeamMixin = {
         poke.moves.forEach((move, i) => {
             ctx.fillText(`- ${move.replace(/-/g, ' ').toUpperCase()}`, w * 0.05, h * 0.71 + i * h * 0.07)
         })
-
+        //crée un bouton pour envoyer le poke au combat si ce n'est pas celui déja présent
         if (poke._id !== this.playerPokemon._id) {
             this.drawSlot(ctx, w * 0.3, h * 0.85, w * 0.4, h * 0.08, true)
             ctx.fillStyle = "white"
@@ -163,6 +165,7 @@ export const BattleTeamMixin = {
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${newPoke.id}`)
         const data = await res.json()
         const stats = data.stats
+        //load les stats du nouveau pokémon
         const calcStat = (base, niveau) => Math.floor((2 * base * niveau) / 100) + 5
         this.playerMaxHP          = Math.floor((2 * stats.find(s => s.stat.name === "hp").base_stat * newPoke.niveau) / 100) + newPoke.niveau + 10
         this.playerAttack         = calcStat(stats.find(s => s.stat.name === "attack").base_stat, newPoke.niveau)
@@ -170,7 +173,7 @@ export const BattleTeamMixin = {
         this.playerDefense        = calcStat(stats.find(s => s.stat.name === "defense").base_stat, newPoke.niveau)
         this.playerSpecialDefense = calcStat(stats.find(s => s.stat.name === "special-defense").base_stat, newPoke.niveau)
         this.playerSpeed          = calcStat(stats.find(s => s.stat.name === "speed").base_stat, newPoke.niveau)
-        
+
         this.playerTypes          = data.types.map(t => t.type.name)
         this.playerCurrentHP      = newPoke.currentHP ?? this.playerMaxHP
         this.playerDisplayHP      = this.playerCurrentHP

@@ -1,5 +1,6 @@
 export const PokedexMixin = {
 
+    //récupère les infos du pokedex du joueur
     async fetchPokedex() {
         const res = await fetch("http://localhost:3000/api/pokedex")
         this.pokedexData = await res.json()
@@ -39,13 +40,13 @@ export const PokedexMixin = {
         const cellW = w / cols
         const cellH = 100
         const startY = 70
-
+        //fait une case pour tout les pokémons croisés
         this.pokedexData.forEach((entry, i) => {
             const col = i % cols
             const row = Math.floor(i / cols)
             const x = col * cellW + cellW / 2
             const y = startY + row * cellH
-
+            //mets le sprite
             const sprite = this.pokedexSprites[entry.pokemonId]
             if (sprite) {
                 ctx.drawImage(sprite, x - 32, y, 64, 64)

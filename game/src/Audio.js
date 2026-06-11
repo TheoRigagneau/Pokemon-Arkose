@@ -5,6 +5,7 @@ export default class AudioGame {
         this.volume = 0.5
     }
 
+    //récupère la musique
     load(key, path) {
         const audio = new window.Audio(path)
         audio.loop = true
@@ -12,6 +13,7 @@ export default class AudioGame {
         this.tracks[key] = audio
     }
 
+    //lance le son
     play(key) {
         console.log("play:", key, "track:", this.tracks[key])
         if (this.current === key) return
@@ -27,6 +29,7 @@ export default class AudioGame {
         }
     }
 
+
     stop() {
         if (this.current && this.tracks[this.current]) {
             this.tracks[this.current].pause()
@@ -35,6 +38,7 @@ export default class AudioGame {
         this.current = null
     }
 
+    //change le volume
     setVolume(v) {
         this.volume = v
         for (const track of Object.values(this.tracks)) {

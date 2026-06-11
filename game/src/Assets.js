@@ -1,4 +1,5 @@
 class Assets {
+    //loads les images
     constructor() {
         this.images = {}
     }

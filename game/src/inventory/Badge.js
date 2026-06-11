@@ -1,5 +1,5 @@
 export const BadgesMixin = {
-
+    //page badges 
     drawBadges() {
         const ctx = this.ctx
         const w = this.canvas.width

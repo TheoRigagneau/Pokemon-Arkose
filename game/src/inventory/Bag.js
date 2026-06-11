@@ -8,7 +8,7 @@ export const BagMixin = {
         this.inventoryData = await invRes.json()
         this.itemsData = await itemsRes.json()
     },
-
+    //sac
     drawSac() {
         const ctx = this.ctx
         const w = this.canvas.width
@@ -24,11 +24,12 @@ export const BagMixin = {
 
         const back = this.assets.get("back")
         if (back) ctx.drawImage(back, w - 80, 10, 60, 50)
-
+        //partie heal
         const healItems = this.inventoryData.filter(inv => {
             const item = this.itemsData.find(i => i.name === inv.itemName)
             return item?.type === "heal" || item?.type === "revive" || item?.type === "candy"
         })
+        //partie ball
         const ballItems = this.inventoryData.filter(inv => {
             const item = this.itemsData.find(i => i.name === inv.itemName)
             return item?.type === "pokeball"
@@ -41,7 +42,7 @@ export const BagMixin = {
 
         ctx.fillStyle = "#4080d0"
         ctx.fillText("POKÉBALLS", w * 0.55, h * 0.14)
-
+        //case pour les objets de soins
         healItems.forEach((inv, i) => {
             const x = w * 0.04
             const y = h * 0.2 + i * h * 0.12
@@ -66,7 +67,7 @@ export const BagMixin = {
             ctx.fillText(`x${inv.quantity}`, x + w * 0.42 - 12, y + h * 0.055)
             ctx.textAlign = "left"
         })
-
+        //case pour les balls
         ballItems.forEach((inv, i) => {
             const x = w * 0.54
             const y = h * 0.2 + i * h * 0.12
@@ -92,14 +93,14 @@ export const BagMixin = {
             ctx.textAlign = "left"
         })
     },
-
     async useCandy(poke) {
         if (!this.selectedItem) return
         const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
+        //change ses stats
         const newNiveau = poke.niveau + 1
         const newMaxHP = (poke.maxHP ?? 0) + 2
         const newCurrentHP = Math.min(poke.currentHP ?? 0, newMaxHP)
-
+        //vérifie s'il n'apprend pas de nouvelles attaques à ce niveau
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
         const data = await res.json()
         const newMoves = data.moves.filter(m => m.version_group_details.some(v =>
@@ -111,31 +112,34 @@ export const BagMixin = {
             this.pendingMovePoke = poke
             this.canvas.style.pointerEvents = "all"
         }
-
+        //vérifie s'il peut évoluer à ce niveau
         const evoName = await this.checkEvolution(poke.id, newNiveau)
         if (evoName) {
             const evoRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${evoName}`)
             const evoData = await evoRes.json()
-
+            //change les infos du poké dans la db
             await fetch(`http://localhost:3000/api/team/${poke._id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ pokemon: evoName, id: evoData.id, niveau: newNiveau, maxHP: newMaxHP, currentHP: newCurrentHP })
             })
-
+            //change les infos du poké maintenant évoluer et mets un message pour dire qu'il a évolué
             const oldName = poke.pokemon
             poke.pokemon = capitalize(evoName)
             poke.id = evoData.id
             this.pendingEvolutionMessage = `${oldName} a évolué en ${capitalize(evoName)} !`
             setTimeout(() => { this.pendingEvolutionMessage = null }, 3000)
-        } else {
+        } 
+
+        else {
+            //change les stats dans la db
             await fetch(`http://localhost:3000/api/team/${poke._id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ niveau: newNiveau, maxHP: newMaxHP, currentHP: newCurrentHP })
             })
         }
-
+        //supprime un bonbon du sac
         await fetch(`http://localhost:3000/api/inventory/${encodeURIComponent(this.selectedItem.itemName)}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -155,6 +159,7 @@ export const BagMixin = {
     },
 
     async checkEvolution(pokeId, niveau) {
+        //reagrde si le poke peut évoluer à ce niveau
         const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokeId}`)
         const speciesData = await speciesRes.json()
 
@@ -179,5 +184,69 @@ export const BagMixin = {
         }
 
         return findEvolution(chainData.chain)
-    }
+    },
+
+    async useHeal(poke, item) {
+        if (!this.selectedItem) return
+        const isDead = (poke.currentHP ?? 0) <= 0
+        const isFull = poke.currentHP >= poke.maxHP
+        if (isDead || isFull) return
+        //heal le poké en fonction de l'objet utilisé
+        const newHP = Math.min(poke.currentHP + item.healAmount, poke.maxHP)
+        //change les infos dans la db
+        await fetch(`http://localhost:3000/api/team/${poke._id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentHP: newHP })
+        })
+        //retire un objet utilisé de la db
+        await fetch(`http://localhost:3000/api/inventory/${encodeURIComponent(this.selectedItem.itemName)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: -1 })
+        })
+
+        poke.currentHP = newHP
+        this.selectedItem.quantity--
+        this.selectedItem = null
+        this.showTeam = false
+        this.activeTab = "sac"
+        this.showSac = true
+        await this.fetchInventory()
+        await this.fetchTeam()
+    },
+
+    async useRevive(poke) {
+        if (!this.selectedItem) return
+        const isDead = (poke.currentHP ?? 0) <= 0
+        if (!isDead) return
+
+        //revive le poké
+        const newHP = Math.floor(poke.maxHP / 2)
+
+        //change les infos dans la db
+        await fetch(`http://localhost:3000/api/team/${poke._id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentHP: newHP })
+        })
+
+        //supprime un rappel
+        await fetch(`http://localhost:3000/api/inventory/${encodeURIComponent(this.selectedItem.itemName)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: -1 })
+        })
+
+        poke.currentHP = newHP
+        this.selectedItem.quantity--
+        this.selectedItem = null
+        this.showTeam = false
+        this.activeTab = "sac"
+        this.showSac = true
+        await this.fetchInventory()
+        await this.fetchTeam()
+    },
+
+    
 }

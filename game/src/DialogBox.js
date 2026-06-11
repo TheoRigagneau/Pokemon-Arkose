@@ -7,6 +7,7 @@ export default class DialogBox {
         this.selectedChoice = 0;
     }
 
+    //dialogbox qui s'arrête dès qu'elle tombe sur un pipe 
     show(texte, choices = null) {
         this.messages = texte.split("|");
         this.currentIndex = 0;
@@ -20,7 +21,7 @@ export default class DialogBox {
             this.pendingChoices = null;
         }
     }
-
+    //doit cliquer pour continuer le texte
     next() {
         this.currentIndex += 1;
         if (this.currentIndex >= this.messages.length) {
@@ -32,7 +33,7 @@ export default class DialogBox {
             }
         }
     }
-
+    //choix (pour le starter)
     confirmChoice() {
         if (!this.choices) return
         const choice = this.choices[this.selectedChoice]
@@ -46,6 +47,7 @@ export default class DialogBox {
         this.selectedChoice = (this.selectedChoice + direction + this.choices.length) % this.choices.length
     }
 
+    //réalisation du rectangle
     draw() {
         if (!this.isOpen) return
         const pad = 20
@@ -73,6 +75,7 @@ export default class DialogBox {
         this.ctx.fillStyle = "#1a1a2e"
         this.ctx.font = "18px monospace"
 
+        //choix avec couleur (toujours pour le starter)
         if (this.choices) {
             this.ctx.fillText("Que veux-tu faire ?", pad + 20, y + 50)
             this.choices.forEach((choice, i) => {
@@ -81,7 +84,10 @@ export default class DialogBox {
                 this.ctx.font = isSelected ? "bold 18px monospace" : "18px monospace"
                 this.ctx.fillText(`${isSelected ? "▶ " : "  "}${choice.label}`, pad + 40, y + 80 + i * 30)
             })
-        } else {
+        } 
+        
+        //texte classique d'un pnj ou d'un combat
+        else {
             this.ctx.fillStyle = "#1a1a2e"
             this.ctx.font = "18px monospace"
             this.ctx.fillText(this.messages[this.currentIndex], pad + 20, y + 50)

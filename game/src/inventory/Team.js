@@ -1,5 +1,5 @@
 export const TeamMixin = {
-
+    //récupère les infos de la team 
     async fetchTeam() {
         const res = await fetch("http://localhost:3000/api/team")
         this.teamData = await res.json()
@@ -8,7 +8,8 @@ export const TeamMixin = {
             if (!poke.maxHP) {
                 const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
                 const data = await pokeRes.json()
-                poke.maxHP = data.stats.find(s => s.stat.name === "hp").base_stat
+                const baseHP = data.stats.find(s => s.stat.name === "hp").base_stat
+                poke.maxHP = Math.floor((2 * baseHP * poke.niveau) / 100) + poke.niveau + 10
             }
         }
     },
@@ -37,6 +38,7 @@ export const TeamMixin = {
         const back = this.assets.get("back")
         if (back) ctx.drawImage(back, w - 80, 10, 60, 50)
 
+        //si team vide
         if (!this.teamData?.length) {
             ctx.fillStyle = "rgba(255,255,255,0.5)"
             ctx.font = "10px 'Press Start 2P'"
@@ -44,7 +46,7 @@ export const TeamMixin = {
             ctx.fillText("Aucun Pokémon", w / 2, h / 2)
             return
         }
-
+        //tout les slots
         const slots = [
             { x: 10,        y: 70 },
             { x: w / 2 + 5, y: 70 },
@@ -55,7 +57,7 @@ export const TeamMixin = {
         ]
         const sw = w / 2 - 15
         const sh = h * 0.24
-
+        //couleur des slots différentes en fonction de la précense du pokemon
         for (let i = 0; i < 6; i++) {
             const slot = slots[i]
             const poke = this.teamData[i]
@@ -112,6 +114,7 @@ export const TeamMixin = {
             ctx.font = "7px 'Press Start 2P'"
             ctx.fillText(`Nv.${poke.niveau}`, textX, slot.y + sh * 0.5)
 
+            //barre d'hp
             const currentHP = poke.currentHP ?? 0
             const maxHP = poke.maxHP ?? 1
             const hpPct = Math.max(0, currentHP / maxHP)
@@ -135,6 +138,8 @@ export const TeamMixin = {
     },
 
     drawPokemonDetail(poke, index) {
+        //si le joueur clique sur le pokemon
+        //page stats pokemon
         const ctx = this.ctx
         const w = this.canvas.width
         const h = this.canvas.height

@@ -84,21 +84,25 @@ export default class Inventory {
     }
 
     draw() {
+        //aprends un move
         if (this.pendingMove) {
             this.drawLearnMove()
             return
         }
 
+        //dans le pc
         if (this.showPC) {
             this.drawPC()
             return
         }
 
+        //dans le shop
         if (this.showShop) {
             this.drawShop()
             return
         }
 
+        //message d'évolution
         if (this.pendingEvolutionMessage) {
             const ctx = this.ctx
             const w = this.canvas.width
@@ -118,7 +122,7 @@ export default class Inventory {
         }
 
         if (!this.isOpen) return
-
+        //inventaire de base
         const ctx = this.ctx
         const w = this.canvas.width
         const h = this.canvas.height
@@ -158,17 +162,15 @@ export default class Inventory {
             const isRetour = tab.key === "retour"
             const isActive = this.activeTab === tab.key
             const isHover = this.hoverTab === tab.key
-
-            ctx.fillStyle = isRetour
-                ? isHover ? "rgba(220,60,60,0.9)" : "rgba(180,40,40,0.7)"
-                : isActive ? "rgba(100,80,140,0.9)"
-                : isHover ? "rgba(80,65,105,0.9)"
-                : "rgba(60,50,80,0.8)"
+            //change la couleur et le contour en fonction de la précense ou non du joueur si le bouton retour
+            ctx.fillStyle = isRetour ? isHover ? "rgba(220,60,60,0.9)" : "rgba(180,40,40,0.7)"
+                : isActive ? "rgba(100,80,140,0.9)" : isHover ? "rgba(80,65,105,0.9)" : "rgba(60,50,80,0.8)"
 
             ctx.beginPath()
             ctx.roundRect(btnX, btnY, btnW, btnH, 10)
             ctx.fill()
 
+            //même chose pour les autres boutons
             ctx.strokeStyle = isActive ? "rgba(200,170,255,0.6)" : "rgba(255,255,255,0.08)"
             ctx.lineWidth = 1.5
             ctx.beginPath()
@@ -199,6 +201,7 @@ export default class Inventory {
         if (this.activeTab === "settings" && this.showSettings) {this.drawSettings()}
         if (this.pendingMove) this.drawLearnMove()
 
+        //message de sauvegarde
         if (this.saveMessage) {
             const boxW = 400
             const boxH = 80
@@ -222,8 +225,9 @@ export default class Inventory {
 
         ctx.textAlign = "left"
     }
-
+    //regarde ou clique le joueur
     handleClick(mouseX, mouseY) {
+        //si le poké apprend un move
         if (this.pendingMove) {
             const w = this.canvas.width
             const h = this.canvas.height
@@ -249,7 +253,7 @@ export default class Inventory {
             })
             return
         }
-
+        //si le joueur est dans le pc
         if (this.showPC) {
             const w = this.canvas.width
             const h = this.canvas.height
@@ -265,7 +269,7 @@ export default class Inventory {
             const slotW = w / 2 - 30
             const slotH = 70
             const startY = 90
-
+            //mets un poké du pc dans la team
             for (let i = 0; i < 6; i++) {
                 const x = 15
                 const y = startY + i * (slotH + 8)
@@ -278,7 +282,7 @@ export default class Inventory {
             for (let i = 0; i < 6; i++) {
                 const x = w / 2 + 15
                 const y = startY + i * (slotH + 8)
-                console.log("pc slot", i, "x:", x, x + slotW, "y:", y, y + slotH, "mouse:", mouseX, mouseY)
+                //mets un poke de la team dans le pc
                 if (mouseX >= x && mouseX <= x + slotW && mouseY >= y && mouseY <= y + slotH) {
                     this.swapPCPokemon("pc", i)
                     return
@@ -287,6 +291,7 @@ export default class Inventory {
             return
         }
 
+        //si le joueur est dans le shop
         if (this.showShop) {
             const w = this.canvas.width
             const h = this.canvas.height
@@ -302,7 +307,7 @@ export default class Inventory {
                 { name: "Potion",   price: 300 },
                 { name: "Pokéball", price: 200 },
             ]
-
+            //achete un objet
             items.forEach((item, i) => {
                 const x = w * 0.1
                 const y = h * 0.2 + i * h * 0.16
@@ -313,7 +318,7 @@ export default class Inventory {
             })
             return
         }
-
+        //s'il est dans les settings
         if (this.showSettings) {
             const w = this.canvas.width
             const h = this.canvas.height
@@ -327,7 +332,7 @@ export default class Inventory {
             const barY = h * 0.38
             const barW = w * 0.8
             const barH = 20
-
+            //gère le son de la musique
             if (mouseX >= barX && mouseX <= barX + barW &&
                 mouseY >= barY - 10 && mouseY <= barY + barH + 10) {
                 this.settingsVolume = (mouseX - barX) / barW
@@ -340,20 +345,25 @@ export default class Inventory {
         if (!this.isOpen) return
 
         const w = this.canvas.width
-
+        //s'il clique sur Pokedex
         if (this.showPokedex) {
-            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) this.showPokedex = false
+            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) {
+                this.showPokedex = false
+            }
             return
         }
-
+        //s'il clique sur Équipe
         if (this.showTeam) {
             const h = this.canvas.height
+            //s'il appuie sur le bouton retour
             if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) {
                 if (this.selectedPokemon) this.selectedPokemon = null
                 else if (this.selectedItem) { this.selectedItem = null; this.showTeam = false; this.showSac = true }
                 else this.showTeam = false
                 return
             }
+
+            //s'il regarde les stats du poké
             if (this.selectedPokemon) return
             const slots = [
                 { x: 10, y: 70 }, { x: w / 2 + 5, y: 70 },
@@ -366,27 +376,50 @@ export default class Inventory {
                 if (!this.teamData[i]) continue
                 if (mouseX >= slots[i].x && mouseX <= slots[i].x + sw && mouseY >= slots[i].y && mouseY <= slots[i].y + sh) {
                     if (this.selectedItem) {
+                        //s'il a séléctionner un item et qu'il a été renvoyer sur la page team
                         const item = this.itemsData.find(it => it.name === this.selectedItem.itemName)
-                        if (item?.type === "candy") { this.useCandy(this.teamData[i]); return }
+                        if (item?.type === "candy") { 
+                            //level-up le poké choisi
+                            this.useCandy(this.teamData[i])
+                            return 
+                        }
+
+                        if (item?.type === "heal") {
+                            //heal le poké choisi
+                        this.useHeal(this.teamData[i], item)
+                        return
+
+                        }
+                        if (item?.type === "revive") {
+                            //revive le poké choisi
+                            this.useRevive(this.teamData[i])
+                            return
+                        }
                     }
+
                     this.selectedPokemon = { poke: this.teamData[i], index: i }
                     return
                 }
             }
             return
         }
-
+        
+        //s'il clique sur sac
         if (this.showSac) {
             const h = this.canvas.height
-            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) { this.showSac = false; return }
+            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) {
+                this.showSac = false; return 
+            }
             const healItems = this.inventoryData.filter(inv => {
                 const item = this.itemsData.find(i => i.name === inv.itemName)
                 return item?.type === "heal" || item?.type === "revive" || item?.type === "candy"
             })
+            //fait les cases en fonction des items de heal
             healItems.forEach((inv, i) => {
                 const x = w * 0.04
                 const y = h * 0.2 + i * h * 0.12
                 if (mouseX >= x && mouseX <= x + w * 0.42 && mouseY >= y && mouseY <= y + h * 0.1) {
+                    //s'il peut utilsier l'item, renvoie sur la page team pour l'utiliser
                     if (inv.quantity > 0) {
                         this.selectedItem = inv
                         this.activeTab = "pokemon"
@@ -398,9 +431,11 @@ export default class Inventory {
             })
             return
         }
-
+        //renvoie sur la page badge
         if (this.showBadges) {
-            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) this.showBadges = false
+            if (mouseX >= w - 80 && mouseX <= w - 20 && mouseY >= 10 && mouseY <= 60) {
+                this.showBadges = false
+            }
             return
         }
 
@@ -410,6 +445,7 @@ export default class Inventory {
         const btnMargin = 10
         const startY = 65
         this.tabs.forEach((tab, i) => {
+            //vérifie si sur une page le joueur a cliqué sur le bouton retour
             const btnY = startY + i * (btnH + btnMargin)
             const btnX = panelX + 10
             const btnW = panelW - 20
@@ -427,42 +463,59 @@ export default class Inventory {
 
     async handleKey(key) {
         if (!this.isOpen) return
+        //ferme l'inventaire
         if (key === "x") {
             this.isOpen = false
             this.canvas.style.pointerEvents = "none"
             window.dispatchEvent(new CustomEvent("inventoryClose"))
             return
         }
+
+        //monte dans l'inventaire
         const currentIndex = this.tabs.findIndex(t => t.key === this.activeTab)
         if (key === "s") {
             const next = currentIndex + 1
             this.activeTab = next < this.tabs.length ? this.tabs[next].key : this.tabs[0].key
         }
+        //descend dans l'inventaire
         if (key === "z") {
             const prev = currentIndex - 1
             this.activeTab = prev >= 0 ? this.tabs[prev].key : this.tabs[this.tabs.length - 1].key
         }
+        //va sur la page visée
         if (key === " ") {
             if (this.activeTab === "retour") {
                 this.isOpen = false
                 this.canvas.style.pointerEvents = "none"
                 window.dispatchEvent(new CustomEvent("inventoryClose"))
-            } else if (this.activeTab === "pokedex") {
+            } 
+
+            else if (this.activeTab === "pokedex") {
                 if (this.showPokedex) { this.showPokedex = false; return }
                 await this.fetchPokedex(); this.showPokedex = true
-            } else if (this.activeTab === "pokemon") {
+            } 
+
+            else if (this.activeTab === "pokemon") {
                 if (this.showTeam) { this.showTeam = false; return }
                 await this.fetchTeam(); this.showTeam = true
-            } else if (this.activeTab === "sac") {
+            } 
+
+            else if (this.activeTab === "sac") {
                 if (this.showSac) { this.showSac = false; return }
                 await this.fetchInventory(); this.showSac = true
-            } else if (this.activeTab === "badges") {
+            } 
+            
+            else if (this.activeTab === "badges") {
                 this.showBadges = !this.showBadges
-            } else if (this.activeTab === "save") {
+            } 
+            
+            else if (this.activeTab === "save") {
                 window.dispatchEvent(new CustomEvent("saveGame"))
                 this.saveMessage = "Partie sauvegardée !"
                 setTimeout(() => { this.saveMessage = null }, 2000)
-            } else if (this.activeTab === "settings") {
+            } 
+            
+            else if (this.activeTab === "settings") {
                 if (this.showSettings) {
                     this.showSettings = false
                 } else {

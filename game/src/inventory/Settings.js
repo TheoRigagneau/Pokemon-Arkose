@@ -36,12 +36,14 @@ export const SettingsMixin = {
         ctx.roundRect(barX, barY, barW * this.settingsVolume, barH, 10)
         ctx.fill()
 
+        //curseur pour la musique
         const cursorX = barX + barW * this.settingsVolume
         ctx.fillStyle = "white"
         ctx.beginPath()
         ctx.arc(cursorX, barY + barH / 2, 14, 0, Math.PI * 2)
         ctx.fill()
 
+        //volume de la musique
         ctx.fillStyle = "white"
         ctx.font = "11px 'Press Start 2P'"
         ctx.textAlign = "center"

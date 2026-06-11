@@ -1,4 +1,6 @@
 import Assets from "./Assets.js";
+
+//toutes les assets des pnj, villes et objets
 export const ASSETS = [
     { key: "tileset", path: "./assets/tilesets/sprites.png" },
     { key: "house", path: "./assets/tilesets/house.png" },
