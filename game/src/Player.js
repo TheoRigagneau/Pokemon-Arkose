@@ -37,33 +37,41 @@ class Player {
         this.targetX = this.renderX;
         this.targetY = this.renderY;
         this.inBattle = false
+        this.inTrainerZone = false
+        this.pendingBattle = null
 
         this.inputState = { up: false, down: false, left: false, right: false, interact: false, run: false, inventory : false }
 
 
 
-        window.addEventListener("keydown", (event) => {
+        window.addEventListener("keydown", async (event) => {
             switch (event.key.toLowerCase()) {
-                case "z"    : this.inputState.up = true; break;
-                case "s"    : this.inputState.down = true; break;
+                case "z":
+                    this.inputState.up = true;
+                    if (this.dialogBox.choices) this.dialogBox.navigateChoice(-1);
+                    break;
+                case "s":
+                this.inputState.down = true;
+                if (this.dialogBox.choices) this.dialogBox.navigateChoice(1);
+                break;
                 case "q"    : this.inputState.left = true; break;
                 case "d"    : this.inputState.right = true; break;
                 case "x": this.inputState.inventory = true; break;
                 case "shift": this.inputState.run = true; break;
                 case " ":
-                    if (!this.inputState.interact) {
-
-                        if (this.dialogBox.isOpen) {
-                            this.dialogBox.next();
-                        } else {
-                            this.interact();
-                        }
-
+                if (!this.inputState.interact && !this.inventoryOpen) {
+                    if (this.dialogBox.choices) {
+                        this.dialogBox.confirmChoice()
+                    } else if (this.dialogBox.isOpen) {
+                        this.dialogBox.next()
+                    } else {
+                        await this.interact()
                     }
+                }
 
-                    this.inputState.interact = true;
-                    break;
-            }
+                this.inputState.interact = true;
+                break;
+                }
         });
 
         window.addEventListener("keyup", (event) => {
@@ -108,7 +116,8 @@ class Player {
         
         return false
     }
-    interact() {
+    async interact() {
+        console.log("interact appelé")
         let checkX = this.renderX
         let checkY = this.renderY
 
@@ -125,9 +134,11 @@ class Player {
         for (const layer of this.map.layers) {
             if (layer.name === "interactions") {
                 for (const obj of layer.objects) {
-                    if (checkX >= obj.x && checkX < obj.x + obj.width &&
-                        checkY >= obj.y && checkY < obj.y + obj.height) {
+
+                    if (checkX >= obj.x && checkX < obj.x + obj.width && checkY >= obj.y && checkY < obj.y + obj.height) {
+
                         const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+
                         if (info.type === "porte") {
                             this.dialogBox.isOpen = false
                             window.dispatchEvent(new CustomEvent("changeMap", {
@@ -139,9 +150,44 @@ class Player {
                                 
                             }))
                         }
+
                         else if (info.type === "pancarte" || info.type === "eau" || info.type === "statue") {
                             this.dialogBox.show(info.dialogue)
                         }
+
+                        else if (info.type === "heal") {
+                            this.dialogBox.show(info.dialogue)
+                            window.dispatchEvent(new CustomEvent("healTeam"))
+                        }
+
+                        else if (info.type === "shop") {
+                            window.dispatchEvent(new CustomEvent("openShop"))
+                        }
+
+                        else if (info.type === "pokeball") {
+                            console.log("pokeball trouvée", info.pokemon)
+                            const res = await fetch("http://localhost:3000/api/starter")
+                            const starter = await res.json()
+                            if (starter.chosen) return
+
+                            this.dialogBox.show(
+                                `${info.pokemon} est dans cette Pokéball !`,
+                                [
+                                    { label: "Oui, je le prends !", action: () =>
+                                        window.dispatchEvent(new CustomEvent("starterChosen", { 
+                                        detail: { 
+                                            pokemon: info.pokemon,
+                                            name: info.name
+                                        } })) },
+                                    { label: "Non merci.", action: () => {} }
+                                ]
+                            )
+                        }
+
+                        else if (info.type === "pc") {
+                            window.dispatchEvent(new CustomEvent("openPC"))
+                        }
+
                         return
                     }
                 }
@@ -160,8 +206,6 @@ class Player {
                         checkY >= obj.y - 16 &&
                         checkY < obj.y + obj.height + 16
                     ) {
-                        this.dialogBox.show(info.dialogue);
-
                         return;
                     }
                 }
@@ -219,16 +263,56 @@ class Player {
         }
         this.LastDirection = this.direction
     }
+    async checkTrainerZones() {
+        if (this.inBattle) return
+
+        let inTrainerZone = false
+
+        for (const layer of this.map.layers) {
+            if (layer.name === "interactions") {
+                for (const obj of layer.objects) {
+                    if (!obj.properties) continue
+                    const info = Object.fromEntries(obj.properties.map(p => [p.name, p.value]))
+                    if (info.type !== "trainer") continue
+
+                    if (this.renderX >= obj.x && this.renderX < obj.x + obj.width &&
+                    this.renderY >= obj.y && this.renderY < obj.y + obj.height) {
+                    
+                        inTrainerZone = true
+
+                        if (!this.inTrainerZone) {
+                            this.inTrainerZone = true
+
+                            const res = await fetch(`http://localhost:3000/api/trainers/${info.pnjID}`)
+                            const trainer = await res.json()
+                            if (trainer.defeated) return
+
+                            const pokemons = info.pokemon.split(",").map(p => {
+                                const [id, niveau] = p.split(":")
+                                return { id: parseInt(id), niveau: parseInt(niveau) }
+                            })
+
+                            window.dispatchEvent(new CustomEvent("trainerBattle", {
+                                detail: { pnjID: info.pnjID, pokemons, dialogue: info.dialogue }
+                            }))
+                        }
+                    }
+                }
+            }
+        }
+        if (!inTrainerZone) this.inTrainerZone = false
+    }
+
     async Encounter(currentTileX, currentTileY) {
         window.dispatchEvent(new CustomEvent("grassStep", {
                 detail: {
-                    tileX: Math.floor(this.renderX / 32),
-                    tileY: Math.floor(this.renderY / 32)
+                    tileX: currentTileX,
+                    tileY: currentTileY
             }}))
         this.inGrass = true
         this.lastGrassTileX = currentTileX
         this.lastGrassTileY = currentTileY
-        let encounters = Math.floor(Math.random()*2);
+        let encounters = Math.floor(Math.random()*7);
         if (encounters == 1) {
             for (const layer of this.map.layers) {
                 if (layer.name === "localisation") {
@@ -279,26 +363,21 @@ class Player {
                 this.renderX = this.targetX
                 this.renderY = this.targetY
                 this.isMoving = false
+
+                const currentTileX = Math.floor(this.renderX / 32)
+                const currentTileY = Math.floor(this.renderY / 32)
+
+                if (this.isOnGrass(this.renderX, this.renderY)) {
+                    if (!this.inGrass || currentTileX !== this.lastGrassTileX || currentTileY !== this.lastGrassTileY) {
+                        this.Encounter(currentTileX, currentTileY)
+                    }
+                } else {
+                    this.inGrass = false
+                }
             } else {
-            this.renderX += Math.sign(dx) * speed
-            this.renderY += Math.sign(dy) * speed
+                this.renderX += Math.sign(dx) * speed
+                this.renderY += Math.sign(dy) * speed
             }
-        }
-        const currentTileX = Math.floor(this.renderX / 32)
-        const currentTileY = Math.floor(this.renderY / 32)
-        
-
-        if (this.isOnGrass(this.renderX, this.renderY)) {
-            
-            if (!this.inGrass || currentTileX !== this.lastGrassTileX || currentTileY !== this.lastGrassTileY) {
-               const pokemon_encounter = this.Encounter(currentTileX, currentTileY)
-               
-            }
-            
-
-        }
-        else {
-                this.inGrass = false
         }
 
         if (!this.isMoving) {
@@ -343,6 +422,7 @@ class Player {
             }
         }
         this.checkZones()
+        this.checkTrainerZones()
     }
     
 

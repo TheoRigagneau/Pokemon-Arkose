@@ -35,7 +35,7 @@
             31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651, 31651],
          "height":30,
          "id":1,
-         "name":"Calque de Tuiles 1",
+         "name":"Sol",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -119,6 +119,12 @@
          "id":2,
          "name":"mur",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"collision",
+                 "type":"bool",
+                 "value":false
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":29,
@@ -160,6 +166,12 @@
          "id":4,
          "name":"objet",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"collision",
+                 "type":"bool",
+                 "value":true
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":29,
@@ -211,11 +223,6 @@
                  "opacity":1,
                  "properties":[
                         {
-                         "name":"bonus",
-                         "type":"string",
-                         "value":"shop"
-                        }, 
-                        {
                          "name":"dialogue",
                          "type":"string",
                          "value":""
@@ -223,7 +230,7 @@
                         {
                          "name":"type",
                          "type":"string",
-                         "value":"PNJ"
+                         "value":"shop"
                         }],
                  "rotation":0,
                  "type":"",
@@ -250,9 +257,14 @@
                  "opacity":1,
                  "properties":[
                         {
+                         "name":"direction",
+                         "type":"string",
+                         "value":"west"
+                        }, 
+                        {
                          "name":"sprite",
                          "type":"string",
-                         "value":"NPC_113"
+                         "value":"npc_113"
                         }, 
                         {
                          "name":"type",

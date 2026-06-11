@@ -4,8 +4,9 @@ import { ASSETS } from "./assets_config.js"
 import DialogBox from "./DialogBox.js"
 import Transition from "./animations/Transition.js"
 import zoneTransition from "./animations/zonetransition.js"
-import Battle from "./Battle.js"
-import Inventory from "./Inventory.js"
+import Battle from "./battle/Battle.js"
+import Inventory from "./inventory/Inventory.js"
+import Audiogame from "./Audio.js"
 
 class GameView {
     constructor() {
@@ -77,6 +78,9 @@ class GameView {
                                 } else if (source.includes("house")) {
                                     tileset = this.assets.get("house")
                                     localTileId = tileId - tilesetInfo.firstgid + 1
+                                } else if (source.includes("sprites")) {
+                                    tileset = this.assets.get("tileset")
+                                    localTileId = tileId - tilesetInfo.firstgid + 1
                                 }
                             }
                             const tilesetX = ((localTileId - 1) % tilesetColumns) * 16
@@ -143,9 +147,18 @@ class GameView {
             if (layer.name === "PNJ") {
                 for (const obj of layer.objects) {
                     const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
+                    const direction = obj.properties?.find(p => p.name === "direction")?.value ?? "south"
                     const sprite = this.assets.get(spriteKey)
                     if (sprite) {
-                        this.ctx.drawImage(sprite, 0, 0, 64, 64, obj.x - 32, obj.y - 32, 64, 64)
+                        const directionRow = {
+                            south: 3,
+                            north: 0,
+                            east: 1,
+                            west: 2
+                        }[direction] ?? 3
+
+                        const row = directionRow
+                        this.ctx.drawImage(sprite, 0, row * 64, 64, 64, obj.x - 32, obj.y - 32, 64, 64)
                     }
                 }
             }
@@ -164,6 +177,17 @@ class GameView {
         this.grassAnimations = this.grassAnimations.filter(a => a.timer < 32)
     }
     gameLoop() {
+        if (this.waitingForInteraction) {
+            this.ctx.fillStyle = "#1a1a2e"
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+            this.ctx.fillStyle = "white"
+            this.ctx.font = "bold 20px 'Press Start 2P'"
+            this.ctx.textAlign = "center"
+            this.ctx.fillText("Appuie sur ESPACE pour jouer", this.canvas.width / 2, this.canvas.height / 2)
+            this.ctx.textAlign = "left"
+            requestAnimationFrame(() => this.gameLoop())
+            return
+        }
         if (this.battle) {
             this.uiCtx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height)
             this.trCtx.clearRect(0, 0, this.transitionCanvas.width, this.transitionCanvas.height)
@@ -208,38 +232,71 @@ class GameView {
     }
 
     async init() {
-        window.game = game;
-        await this.loadMap("./assets/maps/Boscalis.json")
+        window.game = game
+        this.waitingForInteraction = true
+
+        this.audio = new Audiogame()
+        this.audio.load("map",     "./assets/music/map.mp3")
+        this.audio.load("wild",  "./assets/music/wild.mp3")
+        this.audio.load("trainer", "./assets/music/trainer.mp3")
+        this.audio.load("center",  "./assets/music/center.mp3")
 
         this.assets = new Assets()
         for (const asset of ASSETS) {
             await this.assets.load(asset.key, asset.path)
         }
+        this.tileset = this.assets.get("tileset")
+
+        const saveRes = await fetch("http://localhost:3000/api/save")
+        const save = await saveRes.json()
+
         this.inventory = new Inventory(this.uiCanvas, this.uiCtx, this.assets)
+
+        if (save) {
+            await this.loadMap(`./assets/maps/${save.map}.json`)
+            this.currentMap = save.map
+            if (save.volume !== undefined) {
+                this.audio.setVolume(save.volume)
+                this.inventory.settingsVolume = save.volume
+            }
+        } else {
+            await this.loadMap("./assets/maps/Boscalis.json")
+            this.currentMap = "Boscalis"
+        }
+
+        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre", "muret", "pokeball"])
+        this.offscreenTop    = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre", "pokeball"])
+        this.offscreenUp     = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis", "muret"])
+
+        this.playerWalkSprite = this.assets.get("playerWalk")
+        this.playerRunSprite  = this.assets.get("playerRun")
+        this.dialogBox        = new DialogBox()
+        this.zoneTransition   = new zoneTransition()
+        this.transition       = new Transition()
+
+        const startX = save ? save.x : 672
+        const startY = save ? save.y : 2144
+        this.player = new Player(1, "Joueur", "./assets/tilesets/png/npc_198_Lucas.png", [startX, startY], this.map, this.dialogBox, this.transition, this.zoneTransition)
+        if (save) this.player.direction = save.direction
+
 
         this.uiCanvas.addEventListener("click", (e) => {
             const rect = this.uiCanvas.getBoundingClientRect()
             this.inventory.handleClick(e.clientX - rect.left, e.clientY - rect.top)
         })
 
-        this.tileset = this.assets.get("tileset");
-
-        this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre"])
-        this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre"])
-        this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
-            "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis"])
-        this.playerWalkSprite = this.assets.get("playerWalk");
-        this.playerRunSprite = this.assets.get("playerRun");
-        this.dialogBox = new DialogBox();
-        this.zoneTransition = new zoneTransition();
-        this.transition = new Transition();
-        this.player = new Player(1, "Joueur", "./assets/tilesets/png/npc_198_Lucas.png", [672, 2144], this.map, this.dialogBox,this.transition, this.zoneTransition);
-
         window.addEventListener("keydown", (e) => {
+            if (this.waitingForInteraction && e.key === " ") {
+                this.waitingForInteraction = false
+                this.audio.play("map")
+                return
+            }
+
             if (this.inventory.isOpen) {
                 this.inventory.handleKey(e.key.toLowerCase())
                 return
             }
+
             if (e.key === "x" && !this.player.inBattle && !this.dialogBox.isOpen) {
                 const waitForStop = setInterval(() => {
                     if (!this.player.isMoving) {
@@ -254,41 +311,46 @@ class GameView {
                 }, 16)
             }
         })
+
         window.addEventListener("inventoryClose", () => {
             this.player.inventoryOpen = false
         })
 
         window.addEventListener("changeMap", async (e) => {
-            console.log("spawn:", e.detail.spawnX, e.detail.spawnY, "destination:", e.detail.destination)
             this.transition.start(async () => {
+                this.currentMap = e.detail.destination
                 this.dialogBox.isOpen = false
                 await this.loadMap(`./assets/maps/${e.detail.destination}.json`)
-                console.log("calques dans la map:", this.map.layers.map(l => l.name))
-                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre"])
-                this.offscreenTop = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre"])
-                this.offscreenUp = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2",
-                    "pokeball", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis"])
+                this.offscreenBottom = this.buildOffscreenCanvas(["Maison", "Arbre 1", "Arbre2", "tapis", "eau", "Ombre", "Pancarte", "collisions", "fleur", "fleur2", "herbe", "mur", "obj", "table", "vitre", "muret", "pokeball"])
+                this.offscreenTop    = this.buildOffscreenCanvas(["Sol", "fleur", "fleur2", "mur", "obj", "table", "vitre", "pokeball"])
+                this.offscreenUp     = this.buildOffscreenCanvas(["Sol", "Maison", "collisions", "Arbre 1", "Arbre2", "tapis", "eau", "noigrume", "Ombre", "Pancarte", "fleur", "fleur2", "pokeball_invisible", "Ombre2", "PNJ", "transition", "herbe", "tapis", "muret"])
                 this.player.map = this.map
                 this.player.renderX = e.detail.spawnX
                 this.player.renderY = e.detail.spawnY
             })
+            if (e.detail.destination === "centre_pokemon") {
+                this.audio.play("center")
+            } else {
+                this.audio.play("map")
+            }
         })
+
         window.addEventListener("grassStep", (e) => {
             const exists = this.grassAnimations.find(a => a.tileX === e.detail.tileX && a.tileY === e.detail.tileY)
             if (!exists) {
-            this.grassAnimations.push({
-                tileX: e.detail.tileX,
-                tileY: e.detail.tileY,
-                frame: 0
-            })}
-        })
-        window.addEventListener("startbattle", async (e) => {
-            this.zoneTransition.active = false
-            this.currentEncounter = {
-                pokemon: e.detail.pokemon,
-                id: e.detail.id,
-                niveau: e.detail.niveau
+                this.grassAnimations.push({ tileX: e.detail.tileX, tileY: e.detail.tileY, frame: 0 })
             }
+        })
+
+        window.addEventListener("startbattle", async (e) => {
+            await fetch("http://localhost:3000/api/pokedex", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pokemonId: e.detail.id, pokemon: e.detail.pokemon })
+            })
+            this.audio.play("wild")
+            this.zoneTransition.active = false
+            this.currentEncounter = { pokemon: e.detail.pokemon, id: e.detail.id, niveau: e.detail.niveau }
             const waitForMove = setInterval(() => {
                 if (!this.player.isMoving) {
                     clearInterval(waitForMove)
@@ -300,15 +362,123 @@ class GameView {
                 }
             }, 16)
         })
-        window.addEventListener("endBattle", () => {
+
+        window.addEventListener("trainerBattle", async (e) => {
+            if (this.player.inBattle) return
+            this.audio.play("trainer")
+
+            this.currentTrainerId = e.detail.pnjID
+            const firstPoke = e.detail.pokemons[0]
+            
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${firstPoke.id}`)
+            const data = await res.json()
+            const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
+
+            const waitForMove = setInterval(() => {
+                if (!this.player.isMoving) {
+                    clearInterval(waitForMove)
+                    this.player.inBattle = true
+                    setTimeout(() => {
+                        this.transition.start(async () => {
+                            this.battle = new Battle(this.ctx, this.canvas, {
+                                pokemon: capitalize(data.name),
+                                id: firstPoke.id,
+                                niveau: firstPoke.niveau,
+                                isTrainer: true,
+                                trainerPokemons: e.detail.pokemons,
+                                currentTrainerPokeIndex: 0
+                            })
+                            await this.battle.init()
+                        })
+                    }, 1000)
+                }
+            }, 16)
+        })
+
+        window.addEventListener("endBattle", async () => {
             if (this.battle) this.battle.destroy()
+            if (this.currentTrainerId) {
+                await fetch(`http://localhost:3000/api/trainers/${this.currentTrainerId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ defeated: true })
+                })
+                this.currentTrainerId = null
+            }
             this.battle = null
             this.player.inBattle = false
+            this.audio.play("map")
+        })
+
+        window.addEventListener("healTeam", async () => {
+            const response = await fetch("http://localhost:3000/api/team")
+            const team = await response.json()
+            for (const poke of team) {
+                const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
+                const pokeData = await pokeRes.json()
+                const maxHP = pokeData.stats.find(s => s.stat.name === "hp").base_stat
+                await fetch(`http://localhost:3000/api/team/${poke._id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ currentHP: maxHP })
+                })
+            }
+        })
+
+        window.addEventListener("openShop", async () => {
+            await this.inventory.fetchWallet()
+            await this.inventory.fetchInventory()
+            this.inventory.showShop = true
+            this.inventory.canvas.style.pointerEvents = "all"
+            this.player.inventoryOpen = true
+        })
+
+        window.addEventListener("starterChosen", async (e) => {
+            const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${e.detail.name.toLowerCase()}`)
+            const data = await response.json()
+            const moves = data.moves.slice(0, 4).map(m => m.move.name)
+            const maxHP = data.stats.find(s => s.stat.name === "hp").base_stat
+            console.log("maxHP:", maxHP)
+            await fetch("http://localhost:3000/api/team", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pokemon:  capitalize(data.name), id: data.id, niveau: 5, moves, xp: 0, currentHP: maxHP, maxHP })
+            })
+            await fetch("http://localhost:3000/api/starter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chosen: true })
+            })
+        })
+
+        window.addEventListener("openPC", async () => {
+            await this.inventory.fetchTeam()
+            await this.inventory.fetchPC()
+            this.inventory.showPC = true
+            this.inventory.canvas.style.pointerEvents = "all"
+            this.player.inventoryOpen = true
+        })
+
+        window.addEventListener("saveGame", async () => {
+            await fetch("http://localhost:3000/api/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    x: this.player.renderX,
+                    y: this.player.renderY,
+                    map: this.currentMap,
+                    direction: this.player.direction,
+                    volume: this.audio.volume
+                })
+            })
+        })
+
+        window.addEventListener("volumeChange", (e) => {
+            this.audio.setVolume(e.detail.volume)
         })
 
         this.gameLoop()
-
-        
     }
 }
 const game =new GameView();
