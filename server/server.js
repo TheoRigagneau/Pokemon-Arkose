@@ -17,4 +17,28 @@ app.use('/api/encounters', encountersRouter);
 const teamRouter = require('./routes/team');
 app.use('/api/team', teamRouter);
 
+const inventoryRoutes = require('./routes/inventory')
+app.use('/api/inventory', inventoryRoutes)
+
+const itemRoutes = require('./routes/items')
+app.use('/api/items', itemRoutes)
+
+const trainerRoutes = require('./routes/trainers')
+app.use('/api/trainers', trainerRoutes)
+
+const starterRoutes = require('./routes/starter')
+app.use('/api/starter', starterRoutes)
+
+const pokedexRoutes = require('./routes/pokedex')
+app.use('/api/pokedex', pokedexRoutes)
+
+const walletRoutes = require('./routes/wallet')
+app.use('/api/wallet', walletRoutes)
+
+const saveRoutes = require('./routes/save')
+app.use('/api/save', saveRoutes)
+
+const pcRoutes = require('./routes/pc')
+app.use('/api/pc', pcRoutes)
+
 app.listen(3000, () => console.log('Serveur lancé sur le port 3000'));

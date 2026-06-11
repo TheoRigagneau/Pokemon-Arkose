@@ -1,0 +1,21 @@
+const express = require('express')
+const router = express.Router()
+const PC = require('../models/PC')
+
+router.get('/', async (req, res) => {
+    const pc = await PC.find()
+    res.json(pc)
+})
+
+router.post('/', async (req, res) => {
+    const poke = new PC(req.body)
+    await poke.save()
+    res.json(poke)
+})
+
+router.delete('/:id', async (req, res) => {
+    await PC.findByIdAndDelete(req.params.id)
+    res.json({ ok: true })
+})
+
+module.exports = router

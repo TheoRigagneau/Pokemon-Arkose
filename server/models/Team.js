@@ -7,6 +7,7 @@ const teamSchema = new mongoose.Schema({
   moves: [String],
   capturedAt: { type: Date, default: Date.now },
   currentHP: { type: Number, default: null },
+  maxHP: { type: Number, default: null },
   xp: { type: Number, default: 0 }
 });
 
