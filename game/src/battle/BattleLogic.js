@@ -91,7 +91,7 @@ export const BattleLogicMixin = {
             this.message = "Ce n'est pas très efficace..."
         }
 
-        else if (effectiveness = 0) {
+        else if (effectiveness === 0) {
             this.message = "C'est inefficace"
         }
         await new Promise(r => setTimeout(r, 1000))

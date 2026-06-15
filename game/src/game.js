@@ -155,7 +155,7 @@ class GameView {
                     if (this.trainerWalkAnim && props.pnjID == this.trainerWalkAnim.pnjID) continue
 
                     const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
-                    const direction = obj.properties?.find(p => p.name === "direction")?.value ?? "south"
+                    const direction = obj.forcedDirection ?? obj.properties?.find(p => p.name === "direction")?.value ?? "south"
                     const sprite = this.assets.get(spriteKey)
 
                     //ou regarde le pnj
@@ -183,7 +183,7 @@ class GameView {
                 if (Math.abs(dy) > Math.abs(dx)) {
                     row = dy > 0 ? 0 : 3
                 } else {
-                    row = dx > 0 ? 1 : 2
+                    row = dx > 0 ? 2 : 1
                 }
                 this.ctx.drawImage(sprite, 0, row * 64, 64, 64,
                     this.trainerWalkAnim.x - 32,
@@ -320,8 +320,8 @@ class GameView {
         this.zoneTransition   = new zoneTransition()
         this.transition       = new Transition()
 
-        const startX = save ? save.x : 672
-        const startY = save ? save.y : 2144
+        const startX = save ? save.x : 2176
+        const startY = save ? save.y : 1024
         //création du perso
         this.player = new Player(1, "Joueur", "./assets/tilesets/png/npc_198_Lucas.png", [startX, startY], this.map, this.dialogBox, this.transition, this.zoneTransition)
         if (save) this.player.direction = save.direction
@@ -419,6 +419,8 @@ class GameView {
             this.audio.play("trainer")
             this.currentTrainerId = e.detail.pnjID
             //récupère les infos du trainers en fonction de son id
+
+
 
             let trainerObj = null
             for (const layer of this.map.layers) {
@@ -524,6 +526,8 @@ class GameView {
 
         
         window.addEventListener("starterChosen", async (e) => {
+
+
             //récupère le starter choisi
             const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
             const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${e.detail.name.toLowerCase()}`)
@@ -539,6 +543,13 @@ class GameView {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ pokemon:  capitalize(data.name), id: data.id, niveau: 5, moves, xp: 0, currentHP: maxHP, maxHP })
+            })
+
+            //rajoute le starter dans le pokedex
+            await fetch("http://localhost:3000/api/pokedex", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pokemonId: data.id, pokemon: e.detail.pokemon })
             })
 
             //considère comem starter (permet de ne pas en prendre un autre)

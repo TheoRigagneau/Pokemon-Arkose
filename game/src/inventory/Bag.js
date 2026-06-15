@@ -99,7 +99,7 @@ export const BagMixin = {
         //change ses stats
         const newNiveau = poke.niveau + 1
         const newMaxHP = (poke.maxHP ?? 0) + 2
-        const newCurrentHP = Math.min(poke.currentHP ?? 0, newMaxHP)
+        const newCurrentHP = poke.currentHP + 2
         //vérifie s'il n'apprend pas de nouvelles attaques à ce niveau
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
         const data = await res.json()

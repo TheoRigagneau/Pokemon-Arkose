@@ -13,8 +13,8 @@ router.post('/', async (req, res) => {
     res.json(poke)
 })
 
-router.delete('/:id', async (req, res) => {
-    await PC.findByIdAndDelete(req.params.id)
+router.delete('/', async (req, res) => {
+    await PC.deleteMany({})
     res.json({ ok: true })
 })
 

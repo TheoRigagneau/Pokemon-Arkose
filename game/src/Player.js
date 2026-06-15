@@ -236,12 +236,21 @@ class Player {
                         obj.properties.map(p => [p.name, p.value])
                     );
 
-                    if (
-                        checkX >= obj.x - 16 &&
-                        checkX < obj.x + obj.width + 16 &&
-                        checkY >= obj.y - 16 &&
-                        checkY < obj.y + obj.height + 16
-                    ) {
+                    if (checkX >= obj.x - 16 && checkX < obj.x + obj.width + 16 &&
+                        checkY >= obj.y - 16 && checkY < obj.y + obj.height + 16) {
+
+                        const dx = this.renderX - obj.x
+                        const dy = this.renderY - obj.y
+
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            obj.forcedDirection = dx > 0 ? "west" : "east"
+                        } else {
+                            obj.forcedDirection = dy > 0 ? "north" : "south"
+                        }
+
+                        if (info.dialogue) {
+                            this.dialogBox.show(info.dialogue)
+                        }
                         return;
                     }
                 }
