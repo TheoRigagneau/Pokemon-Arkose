@@ -1,5 +1,5 @@
 {
-    "activeFile": "Boscalis.json",
+    "activeFile": "Labo.json",
     "expandedProjectPaths": [
         "."
     ],
@@ -7,9 +7,9 @@
     "fileStates": {
         "Boscalis.json": {
             "expandedObjectLayers": [
-                9,
+                10,
                 15,
-                10
+                9
             ],
             "scale": 1.5,
             "selectedLayer": 5,
@@ -56,8 +56,8 @@
             "scale": 0.5,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 640,
-                "y": 35
+                "x": 639,
+                "y": 34
             }
         },
         "Départ_v2.json": {
@@ -71,6 +71,14 @@
                 "y": -2
             }
         },
+        "Labo.json": {
+            "scale": 0.582258064516129,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 335.76177285318556,
+                "y": 740.2216066481994
+            }
+        },
         "centre_pokemon.json": {
             "expandedObjectLayers": [
                 11,
@@ -79,8 +87,8 @@
             "scale": 0.75,
             "selectedLayer": 4,
             "viewCenter": {
-                "x": 240,
-                "y": 399.33333333333326
+                "x": 256,
+                "y": 415.33333333333326
             }
         },
         "centre_pokemon.tmj": {
@@ -135,8 +143,8 @@
             "scale": 0.75,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 232,
-                "y": 239.3333333333333
+                "x": 248,
+                "y": 255.3333333333333
             }
         },
         "shop.tmj": {
@@ -179,7 +187,8 @@
         "house2.tsx",
         "mountain.tsx",
         "centre_pokemon.json",
-        "shop.json"
+        "shop.json",
+        "Labo.json"
     ],
     "project": "poke_map.tiled-project",
     "property.type": "bool",
@@ -188,14 +197,14 @@
         "C:/pokemon-game/game/assets/tilesets/floor.tsx",
         "C:/pokemon-game/game/assets/tilesets/t.tsx",
         "sprites.tsx",
-        "shop.json",
-        "centre_pokemon.json",
-        "mountain.tsx",
-        "house2.tsx",
-        "house.tsx",
-        "grotte.tsx",
         "Boscalis.json",
-        "centre_pokemon.tmj"
+        "grotte.tsx",
+        "house.tsx",
+        "house2.tsx",
+        "mountain.tsx",
+        "centre_pokemon.json",
+        "shop.json",
+        "Labo.json"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
