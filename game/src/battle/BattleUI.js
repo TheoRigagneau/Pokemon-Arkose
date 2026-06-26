@@ -51,7 +51,7 @@ export const BattleUIMixin = {
             ctx.drawImage(this.enemySprite,  w * 0.65, h * 0.07, h * 0.3,  h * 0.3)
         }
         if (this.playerSprite) {
-            ctx.drawImage(this.playerSprite, w * 0.27, h * 0.28, h * 0.3,  h * 0.3)
+            ctx.drawImage(this.playerSprite, w * 0.27, h * 0.24, h * 0.3,  h * 0.3)
         }
 
         ctx.strokeStyle = "black"

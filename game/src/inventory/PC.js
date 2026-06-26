@@ -45,6 +45,7 @@ export const PCMixin = {
         const slotW = w / 2 - 30
         const slotH = 70
         const startY = 90
+
         //slots de l'équipe
         for (let i = 0; i < 6; i++) {
             const poke = this.teamData[i]
@@ -60,6 +61,7 @@ export const PCMixin = {
             ctx.beginPath()
             ctx.roundRect(x, y, slotW, slotH, 8)
             ctx.stroke()
+
             //sprite
             if (poke) {
                 const sprite = this.teamSprites[poke.id]
@@ -72,6 +74,7 @@ export const PCMixin = {
                 ctx.fillStyle = "rgba(255,255,255,0.7)"
                 ctx.fillText(`Nv.${poke.niveau}`, x + slotH + 4, y + slotH * 0.65)
             }
+
             //mets un coutour jaune pour savoir le poké sélecttionné
             if (this.pcSelected && this.pcSelected.source === "team" && this.pcSelected.index === i) {
                 ctx.strokeStyle = "#ffff00"
@@ -81,6 +84,7 @@ export const PCMixin = {
                 ctx.stroke()
             }
         }
+
         //slots pleins du pc
         for (let i = 0; i < this.pcData.length; i++) {
             const poke = this.pcData[i]
@@ -115,6 +119,7 @@ export const PCMixin = {
                 ctx.stroke()
             }
         }
+
         //slots vide du pc
         for (let i = this.pcData.length; i < 6; i++) {
             const x = w / 2 + 15
@@ -143,6 +148,7 @@ export const PCMixin = {
         this.pcSelected = null
 
         if (selected_pkm.source === source && selected_pkm.index === index) return
+        
         //copie le poké avec un nouvel identifiant pour mongodb
         const clean = (poke) => {
             const { _id, __v, ...rest } = poke

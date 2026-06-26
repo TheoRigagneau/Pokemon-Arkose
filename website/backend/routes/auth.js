@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
     
-    res.json({ token, pseudo: user.pseudo })
+    res.json({ token, pseudo: user.pseudo, role: user.role })
 })
 
 router.post('/login', async (req, res) => {
@@ -30,8 +30,10 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(400).json({ error: 'Mot de passe incorrect' })
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+
+    console.log('user.role:', user.role)
     
-    res.json({ token, pseudo: user.pseudo })
+    res.json({ token, pseudo: user.pseudo, role: user.role })
 })
 
 const crypto = require('crypto')
