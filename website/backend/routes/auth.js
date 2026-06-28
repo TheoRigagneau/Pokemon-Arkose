@@ -63,7 +63,7 @@ router.post('/forgot-password', async (req, res) => {
         to: email,
         subject: 'Réinitialisation de mot de passe',
         html: `<p>Clique sur ce lien pour réinitialiser ton mot de passe :</p>
-               <a href="http://localhost:3000/reset-password?token=${token}">Réinitialiser</a>
+               <a href="http://localhost:3001/reset-password?token=${token}">Réinitialiser</a>
                <p>Ce lien expire dans 1 heure.</p>`
     })
         

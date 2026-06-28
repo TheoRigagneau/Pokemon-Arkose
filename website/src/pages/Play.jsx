@@ -7,7 +7,7 @@ export default function Play({ user, setUser, showAuth, setShowAuth, authTab, se
   let boutonTelechargement
   if (user) {
     boutonTelechargement = (
-      <a href="/game.zip" download>
+      <a href="/PokemonArkose.zip" download>
         <button className="bg-[#c8900a] text-[#0d0a05] font-bold px-10 py-4 rounded hover:bg-[#e0a010] text-sm tracking-widest">
           TÉLÉCHARGER LE JEU
         </button>
@@ -67,7 +67,7 @@ export default function Play({ user, setUser, showAuth, setShowAuth, authTab, se
             <p className="text-2xl mb-3">3️⃣</p>
             <h3 className="text-[#1a1005] font-bold text-sm mb-2">Jouer</h3>
             <p className="text-[#5a4a20] text-xs">Suis les instructions présentes dans le fichier <span className="font-bold text-[#1a1408]">README.md</span> inclus dans le dossier</p>
-            
+
           </div>
         </div>
 

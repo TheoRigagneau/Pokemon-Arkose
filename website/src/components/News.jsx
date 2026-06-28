@@ -2,20 +2,20 @@ export default function News() {
   //rectangle dans lequel on voit les nouveautés lié au jeu
   const articles = [
     {
-      date: "07 Mai 2026",
-      title: "Lancement de la Beta",
-      description: "La première version jouable de Pokémon Arkose est disponible ! Explorez Boscalis et partez à l'aventure."
-    },
-    {
-      date: "15 Avril 2026", 
-      title: "Système de combat",
-      description: "Le système de combat tour par tour est maintenant implémenté avec les vraies stats des Pokémon."
-    },
-    {
-      date: "01 Mars 2026",
-      title: "Début du projet",
-      description: "Pokémon Arkose est officiellement lancé ! Une nouvelle aventure fan-made vous attend."
-    }
+    date: "27 Juin 2026",
+    title: "Fin de la Bêta",
+    description: "La phase de bêta de Pokémon Arkose est fini. Prochaine étape finir le jeu en entier, on vous tiens au courrant le plus tôt possible"
+  },
+  {
+    date: "05 Juin 2026",
+    title: "Finalisation de la première map",
+    description: "La carte de Boscalis est maintenant complète avec tous ses environnements, PNJ et secrets à découvrir."
+  },
+  {
+    date: "07 Mai 2026",
+    title: "Lancement de la Beta",
+    description: "La première version jouable de Pokémon Arkose est disponible ! Explorez Boscalis et partez à l'aventure."
+  }
   ]
 
   return (
