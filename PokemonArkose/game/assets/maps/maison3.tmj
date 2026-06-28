@@ -1,0 +1,217 @@
+{ "compressionlevel":-1,
+ "height":12,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310,
+            12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310, 12310],
+         "height":12,
+         "id":1,
+         "name":"Sol",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[33213, 33214, 33215, 33216, 0, 0, 0, 0, 0,
+            33229, 33230, 33231, 33232, 0, 0, 0, 0, 0,
+            33245, 33246, 33247, 33248, 0, 0, 0, 0, 0,
+            0, 0, 33469, 33470, 0, 0, 33471, 33472, 0,
+            0, 0, 33485, 33486, 0, 0, 33487, 33488, 0,
+            0, 0, 33501, 33502, 0, 0, 33503, 33504, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":12,
+         "id":3,
+         "name":"Chaise",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 33545, 33546, 33547, 33548, 0, 0,
+            0, 0, 0, 33561, 33562, 33563, 33564, 0, 0,
+            0, 0, 0, 33577, 33578, 33579, 33580, 0, 0,
+            0, 0, 0, 33593, 33594, 33595, 33596, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":12,
+         "id":2,
+         "name":"Meuble",
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"collision",
+                 "type":"bool",
+                 "value":true
+                }],
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"interactions",
+         "objects":[
+                {
+                 "height":19.7677291821102,
+                 "id":2,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"spawnX",
+                         "type":"int",
+                         "value":790
+                        }, 
+                        {
+                         "name":"spawnY",
+                         "type":"int",
+                         "value":224
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":30.0469483568075,
+                 "x":52.1868050407709,
+                 "y":180.281690140845
+                }],
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"destination",
+                 "type":"string",
+                 "value":"Boscalis"
+                }, 
+                {
+                 "name":"spawnX",
+                 "type":"int",
+                 "value":10
+                }],
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 36549, 36550,
+            0, 0, 0, 0, 0, 0, 0, 36565, 36566,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 34416, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 34411, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 31489, 31494, 0, 0, 0, 0,
+            0, 0, 0, 31569, 31574, 0, 0, 0, 0],
+         "height":12,
+         "id":4,
+         "name":"objet",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "name":"PNJ",
+         "objects":[
+                {
+                 "height":31.6283666913763,
+                 "id":1,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"collision",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"dialogue",
+                         "type":"string",
+                         "value":"Tu devrais aller dans la grotte \u00e0 cot\u00e9 de Boscalis, la derni\u00e8re fois j'ai trouv\u00e9 des ressources pr\u00e9cieuses"
+                        }, 
+                        {
+                         "name":"sprite",
+                         "type":"string",
+                         "value":"npc4"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"PNJ"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":39.5354583642204,
+                 "x":89.3501359031381,
+                 "y":124.141339263652
+                }],
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"collision",
+                 "type":"bool",
+                 "value":true
+                }],
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":7,
+ "nextobjectid":9,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.12.1",
+ "tileheight":16,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"sprites.tsx"
+        }, 
+        {
+         "firstgid":18849,
+         "source":"..\/..\/..\/..\/..\/..\/..\/Users\/triga\/hi_res_interior_general_tileset_by_akizakura16_d9qifn2.tsx"
+        }],
+ "tilewidth":16,
+ "type":"map",
+ "version":"1.10",
+ "width":9
+}

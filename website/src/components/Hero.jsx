@@ -1,8 +1,10 @@
 export default function Hero({ onAuthClick, user }) {
 
+  let boutonTelechargement
   if (user) {
+
     boutonTelechargement = (
-      <a href="/game.zip" download>
+      <a href="/PokemonArkose.zip" download>
         <button className="mt-8 bg-[#c8900a] text-[#0d0a05] font-bold px-8 py-3 rounded hover:bg-[#e0a010]">
           Télécharger le jeu
         </button>
@@ -25,7 +27,7 @@ export default function Hero({ onAuthClick, user }) {
       <p className="text-[#5a4a20] mt-6 max-w-xl mx-auto text-sm">
         Un fan-game Pokémon jouable dans le navigateur
       </p>
-      
+
       {boutonTelechargement}
     </section>
   )

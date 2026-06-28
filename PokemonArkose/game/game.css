@@ -1,0 +1,21 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+#gameContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: inline-block;
+}
+canvas {
+    border: 1px solid black;
+    display: block;
+}
+#uiCanvas, #transitionCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    cursor: default;
+}

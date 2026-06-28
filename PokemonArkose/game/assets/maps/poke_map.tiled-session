@@ -1,0 +1,223 @@
+{
+    "activeFile": "arene1.json",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
+    "fileStates": {
+        "Boscalis.json": {
+            "expandedObjectLayers": [
+                10,
+                9,
+                15
+            ],
+            "scale": 1.5,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 1376,
+                "y": 1345.6666666666665
+            }
+        },
+        "C:/../../../Users/triga/hi_res_interior_general_tileset_by_akizakura16_d9qifn2.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/4th_gen_outdoor_tileset_by_akizakura16_da5h3mn.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/building (2).tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "C:/pokemon-game/game/assets/tilesets/building-removebg-preview.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/building.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/pokemon-game/game/assets/tilesets/t.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 0.75
+        },
+        "C:/pokemon-game/game/assets/tilesets/test.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "Départ_v1.json": {
+            "scale": 0.5,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 640,
+                "y": 35
+            }
+        },
+        "Départ_v2.json": {
+            "expandedObjectLayers": [
+                9
+            ],
+            "scale": 0.5,
+            "selectedLayer": 11,
+            "viewCenter": {
+                "x": 188,
+                "y": -2
+            }
+        },
+        "Labo.json": {
+            "scale": 0.582258064516129,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 336.6204986149585,
+                "y": 495.4847645429364
+            }
+        },
+        "arene1.json": {
+            "scale": 1.093939393939394,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 224.41828254847647,
+                "y": 393.98891966759004
+            }
+        },
+        "centre_pokemon.json": {
+            "expandedObjectLayers": [
+                10,
+                11
+            ],
+            "scale": 0.75,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 256,
+                "y": 415.33333333333326
+            }
+        },
+        "centre_pokemon.tmj": {
+            "expandedObjectLayers": [
+                11,
+                10
+            ],
+            "scale": 1,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 132.5,
+                "y": 289
+            }
+        },
+        "grass.tsx": {
+            "scaleInDock": 1
+        },
+        "grotte.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "house.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
+        "house2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "maison3.tmj": {
+            "expandedObjectLayers": [
+                6,
+                5
+            ],
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -157,
+                "y": 169
+            }
+        },
+        "mountain.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "shop.json": {
+            "expandedObjectLayers": [
+                6,
+                7
+            ],
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 248,
+                "y": 255.3333333333333
+            }
+        },
+        "shop.tmj": {
+            "expandedObjectLayers": [
+                7,
+                6
+            ],
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 220.66666666666669,
+                "y": 322.6666666666667
+            }
+        },
+        "sprites.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "test.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 2
+        }
+    },
+    "last.exportedFilePath": "C:/pokemon-game/game/assets/maps",
+    "last.imagePath": "C:/pokemon-game/game/assets/tilesets",
+    "map.height": 40,
+    "map.lastUsedExportFilter": "Fichiers de carte JSON (*.tmj *.json)",
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 80,
+    "openFiles": [
+        "Départ_v1.json",
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
+        "C:/pokemon-game/game/assets/tilesets/t.tsx",
+        "sprites.tsx",
+        "Boscalis.json",
+        "grotte.tsx",
+        "house.tsx",
+        "house2.tsx",
+        "mountain.tsx",
+        "centre_pokemon.json",
+        "shop.json",
+        "Labo.json",
+        "arene1.json"
+    ],
+    "project": "poke_map.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+        "Départ_v1.json",
+        "C:/pokemon-game/game/assets/tilesets/floor.tsx",
+        "C:/pokemon-game/game/assets/tilesets/t.tsx",
+        "sprites.tsx",
+        "Boscalis.json",
+        "grotte.tsx",
+        "house.tsx",
+        "house2.tsx",
+        "mountain.tsx",
+        "centre_pokemon.json",
+        "shop.json",
+        "Labo.json"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
