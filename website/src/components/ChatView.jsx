@@ -21,6 +21,7 @@ export default function ChatView({ channelId, channelName, user, onBack }) {
     })
 
     socket.on('messageDeleted', (messageId) => {
+      //garde tout les messages dont l'id est différents de celui séléctionner pour pouvoir le supprimer
       setMessages(prev => prev.filter(m => m._id !== messageId))
     })
 
@@ -54,7 +55,7 @@ export default function ChatView({ channelId, channelName, user, onBack }) {
     })
     socket.emit('deleteMessage', { channelId, messageId })
     setMessages(prev => prev.filter(m => m._id !== messageId))
-}
+  }
 
 
   const getColor = (name) => {
@@ -63,6 +64,27 @@ export default function ChatView({ channelId, channelName, user, onBack }) {
     let hash = 0
     for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i)
     return colors[hash % colors.length]
+    }
+
+    //si utilisateur connecté, affiche le bouton envoyer, sinon le message qui dit qu'il faut se connecter
+    let zoneEnvoi
+    if (user) {
+      zoneEnvoi = (
+        <div className="flex gap-2 mt-3">
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
+            placeholder="Écrire un message..."
+            className="flex-1 border border-[#d8c090] rounded px-3 py-2 text-sm focus:outline-none focus:border-[#c8900a]" />
+          <button onClick={sendMessage}
+            className="bg-[#c8900a] text-[#0d0a05] font-bold px-4 py-2 rounded hover:bg-[#e0a010]">
+            Envoyer
+          </button>
+        </div>
+      )
+    } else {
+      zoneEnvoi = (
+        <p className="text-[#9a7a50] text-xs mt-3 text-center italic">Connecte-toi pour envoyer des messages</p>
+      )
     }
 
   return (
@@ -92,20 +114,7 @@ export default function ChatView({ channelId, channelName, user, onBack }) {
         <div ref={bottomRef} />
       </div>
 
-      {user ? (
-        <div className="flex gap-2 mt-3">
-          <input value={input} onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && sendMessage()}
-            placeholder="Écrire un message..."
-            className="flex-1 border border-[#d8c090] rounded px-3 py-2 text-sm focus:outline-none focus:border-[#c8900a]" />
-          <button onClick={sendMessage}
-            className="bg-[#c8900a] text-[#0d0a05] font-bold px-4 py-2 rounded hover:bg-[#e0a010]">
-            Envoyer
-          </button>
-        </div>
-      ) : (
-        <p className="text-[#9a7a50] text-xs mt-3 text-center italic">Connecte-toi pour envoyer des messages</p>
-      )}
+      {zoneEnvoi}
     </div>
   )
 }

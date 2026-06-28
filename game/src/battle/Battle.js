@@ -22,6 +22,7 @@ export default class Battle {
 
         this.clickHandler = async (e) => {
             if (this.animating) return
+            if (this.clickCooldown) return
             const rect = this.canvas.getBoundingClientRect()
             const mouseX = e.clientX - rect.left
             const mouseY = e.clientY - rect.top
@@ -76,7 +77,7 @@ export default class Battle {
                 return
             }
 
-            if (this.currentMenu === "fight") {
+            else if (this.currentMenu === "fight") {
                 const backW = w * 0.08
                 const backH = h * 0.11
                 const backX = w * 0.46
@@ -111,7 +112,7 @@ export default class Battle {
                 return
             }
 
-            if (this.currentMenu === "main") {
+            else if (this.currentMenu === "main") {
                 const buttons = [
                     { label: "COMBAT",  x: w * 0.3, y: h * 0.79 },
                     { label: "SAC",     x: w * 0.7, y: h * 0.79 },
@@ -127,7 +128,7 @@ export default class Battle {
                 }
             }
 
-            if (this.currentMenu === "pokemon") {
+            else if (this.currentMenu === "pokemon") {
                 const backX = w * 0.91
                 const backY = h * 0.02
                 const backW = w * 0.08
@@ -325,7 +326,11 @@ export default class Battle {
         this.message = null
         if (label === "COMBAT")  this.currentMenu = "fight"
         if (label === "SAC")     this.currentMenu = "bag"
-        if (label === "POKEMON") this.currentMenu = "pokemon"
+        if (label === "POKEMON") {
+            this.currentMenu = "pokemon"
+            this.clickCooldown = true
+            setTimeout(() => { this.clickCooldown = false }, 200)
+        }
         if (label === "FUITE") {
             if (this.encounter.isTrainer) return
             this.saveHP()
@@ -374,26 +379,32 @@ export default class Battle {
             }
         }
 
-        if (this.enemyCurrentHP <= 0 && !this.battleEnded) {
+        if (this.enemyCurrentHP <= 0 && !this.battleEnded && !this.loadingNextPoke) {
             //si c'est un dresseur, check s'il a un autre pokemon en vie
             if (this.encounter.isTrainer) {
                 const nextIndex = (this.encounter.currentTrainerPokeIndex ?? 0) + 1
                 if (nextIndex < this.encounter.trainerPokemons.length) {
                     if (this.enemyDisplayHP > 0) return
                     //donne l'hp et lance le prochain pokemon
+                    this.loadingNextPoke = true
                     this.xpAnimating = true
                     await this.giveXP(this.xpWin)
                     this.xpAnimating = false
                     this.encounter.currentTrainerPokeIndex = nextIndex
                     const nextPoke = this.encounter.trainerPokemons[nextIndex]
-                    this.encounter.id = nextPoke.id
-                    this.encounter.niveau = nextPoke.niveau
                     this.loadNextTrainerPokemon(nextPoke).then(() => {
                         this.animating = false
                         this.message = null
                     })
                     return
                 }
+
+                this.battleEnded = true
+                this.saveHP()
+                setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent("endBattle"))
+                }, 1500)
+                return
             }
             //si poke sauvage
             this.battleEnded = true

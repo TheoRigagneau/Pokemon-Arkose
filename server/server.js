@@ -23,6 +23,9 @@ app.use('/api/inventory', inventoryRoutes)
 const itemRoutes = require('./routes/items')
 app.use('/api/items', itemRoutes)
 
+const badgesRouter = require('./routes/badges')
+app.use('/api/badges', badgesRouter)
+
 const trainerRoutes = require('./routes/trainers')
 app.use('/api/trainers', trainerRoutes)
 

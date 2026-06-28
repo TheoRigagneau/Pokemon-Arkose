@@ -80,7 +80,6 @@ export default function Forum({ user, setUser, showAuth, setShowAuth, authTab, s
         </div>
       )}
 
-
       <Header
         user={user}
         onLogout={onLogout}
@@ -95,11 +94,13 @@ export default function Forum({ user, setUser, showAuth, setShowAuth, authTab, s
         {selectedChannel && (
           <ChatView
             channelId={selectedChannel}
+            //recherche le bon channel (général ou autre en fonction de son id)
             channelName={selectedChannel === "general" ? "Général" : channels.find(c => c._id === selectedChannel)?.name}
             user={user}
             onBack={() => setSelectedChannel(null)}
           />
         )}
+
       {/* page ou l'on voit tout les salons présent déja créer */}
         {!selectedChannel && (
           <>

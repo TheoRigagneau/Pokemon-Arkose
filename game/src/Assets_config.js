@@ -223,5 +223,6 @@ export const ASSETS = [
     { key: "inv_save",      path: "./assets/inventory/save.png" },
     { key: "inv_parametre", path: "./assets/inventory/parametre.png" },
     { key: "inv_retour",    path: "./assets/inventory/retour.png" },
+    { key: "badge1",        path: "./assets/inventory/badge1.png"},
     { key: "back", path: "./assets/battle/back.png" },
      ]

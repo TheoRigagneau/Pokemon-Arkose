@@ -127,6 +127,90 @@
                  "width":62,
                  "x":192.666666666667,
                  "y":482
+                }, 
+                {
+                 "height":34,
+                 "id":6,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"pnjID",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"74:9"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"trainer"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":147.5,
+                 "x":113.151515151515,
+                 "y":371.30303030303
+                }, 
+                {
+                 "height":28,
+                 "id":7,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"pnjID",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"95:9,185:10,138:10"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"trainer"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":132.25,
+                 "x":123.666666666667,
+                 "y":217.666666666667
+                }, 
+                {
+                 "height":34.1818181818182,
+                 "id":8,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"pnjID",
+                         "type":"int",
+                         "value":4
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"74:7,74:7,95:8"
+                        }, 
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"trainer"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":159.113636363636,
+                 "x":191.765151515152,
+                 "y":277.606060606061
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -211,6 +295,11 @@
                          "value":"5"
                         }, 
                         {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"95:9,185:10,138:10"
+                        }, 
+                        {
                          "name":"sprite",
                          "type":"string",
                          "value":"npc_46"
@@ -234,9 +323,19 @@
                  "opacity":1,
                  "properties":[
                         {
+                         "name":"badgeId",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
                          "name":"collision",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"dialogue",
+                         "type":"string",
+                         "value":"Je suis le champion de l'ar\u00e8ne, bon match !"
                         }, 
                         {
                          "name":"direction",
@@ -247,6 +346,11 @@
                          "name":"pnjID",
                          "type":"string",
                          "value":"6"
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"74:10,185:12,222:13,246:15"
                         }, 
                         {
                          "name":"sprite",
@@ -277,6 +381,11 @@
                          "value":true
                         }, 
                         {
+                         "name":"dialogue",
+                         "type":"string",
+                         "value":"Tu veux te battre ?"
+                        }, 
+                        {
                          "name":"direction",
                          "type":"string",
                          "value":"west"
@@ -285,6 +394,11 @@
                          "name":"pnjID",
                          "type":"string",
                          "value":"3"
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"74:9"
                         }, 
                         {
                          "name":"sprite",
@@ -323,6 +437,11 @@
                          "name":"pnjID",
                          "type":"string",
                          "value":"4"
+                        }, 
+                        {
+                         "name":"pokemon",
+                         "type":"string",
+                         "value":"74:7,74:7,95:8"
                         }, 
                         {
                          "name":"sprite",
@@ -392,7 +511,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":6,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

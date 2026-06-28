@@ -152,6 +152,7 @@ class GameView {
             if (layer.name === "PNJ") {
                 for (const obj of layer.objects) {
                     const props = Object.fromEntries(obj.properties?.map(p => [p.name, p.value]) ?? [])
+                    //si le pnj est en train de marcher, on le dessine pas a son endroit de base
                     if (this.trainerWalkAnim && props.pnjID == this.trainerWalkAnim.pnjID) continue
 
                     const spriteKey = obj.properties?.find(p => p.name === "sprite")?.value
@@ -414,10 +415,13 @@ class GameView {
         })
 
         window.addEventListener("trainerBattle", async (e) => {
+             console.log("trainerBattle reçu", e.detail)
+                console.log("currentBadgeId:", e.detail.badgeId)
             if (this.player.inBattle) return
             this.player.inBattle = true
             this.audio.play("trainer")
             this.currentTrainerId = e.detail.pnjID
+            this.currentBadgeId = e.detail.badgeId ?? null
             //récupère les infos du trainers en fonction de son id
 
 
@@ -485,6 +489,7 @@ class GameView {
 
         //termine le combat
         window.addEventListener("endBattle", async () => {
+            console.log("endBattle", this.currentTrainerId, this.currentBadgeId)
             if (this.battle) this.battle.destroy()
             if (this.currentTrainerId) {
                 await fetch(`http://localhost:3000/api/trainers/${this.currentTrainerId}`, {
@@ -492,6 +497,22 @@ class GameView {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ defeated: true })
                 })
+
+                await fetch("http://localhost:3000/api/wallet", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: 500 })
+                })
+
+                if (this.currentBadgeId) {
+                    await fetch("http://localhost:3000/api/badges", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ badgeId: this.currentBadgeId })
+                    })
+                    this.currentBadgeId = null
+                }
+
                 this.currentTrainerId = null
             }
             this.battle = null
@@ -504,13 +525,10 @@ class GameView {
             const response = await fetch("http://localhost:3000/api/team")
             const team = await response.json()
             for (const poke of team) {
-                const pokeRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id}`)
-                const pokeData = await pokeRes.json()
-                const maxHP = pokeData.stats.find(s => s.stat.name === "hp").base_stat
                 await fetch(`http://localhost:3000/api/team/${poke._id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ currentHP: maxHP })
+                    body: JSON.stringify({ currentHP: poke.maxHP })
                 })
             }
         })

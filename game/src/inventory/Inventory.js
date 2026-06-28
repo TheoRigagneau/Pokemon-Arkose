@@ -506,6 +506,7 @@ export default class Inventory {
             } 
             
             else if (this.activeTab === "badges") {
+                await this.fetchBadges()
                 this.showBadges = !this.showBadges
             } 
             

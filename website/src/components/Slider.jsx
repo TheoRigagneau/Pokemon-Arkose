@@ -40,13 +40,22 @@ export default function Slider() {
         </button>
 
         <div className="flex justify-center gap-2 mt-4">
-          {images.map((_, i) => (
+         {images.map((screenshot, i) => {
+          let classeDot
+          if (i === current) {
+            classeDot = "w-2 h-2 rounded-full bg-[#c8900a]"
+          } else {
+            classeDot = "w-2 h-2 rounded-full bg-[#d8c090]"
+          }
+          
+          return (
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`w-2 h-2 rounded-full ${i === current ? "bg-[#c8900a]" : "bg-[#d8c090]"}`}
+              className={classeDot}
             />
-          ))}
+          )
+        })}
         </div>
       </div>
     </section>

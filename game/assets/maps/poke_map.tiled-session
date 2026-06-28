@@ -1,5 +1,5 @@
 {
-    "activeFile": "Labo.json",
+    "activeFile": "arene1.json",
     "expandedProjectPaths": [
         "."
     ],
@@ -8,14 +8,14 @@
         "Boscalis.json": {
             "expandedObjectLayers": [
                 10,
-                15,
-                9
+                9,
+                15
             ],
             "scale": 1.5,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 558.3333333333333,
-                "y": 2174
+                "x": 1376,
+                "y": 1345.6666666666665
             }
         },
         "C:/../../../Users/triga/hi_res_interior_general_tileset_by_akizakura16_d9qifn2.tsx": {
@@ -56,8 +56,8 @@
             "scale": 0.5,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 639,
-                "y": 34
+                "x": 640,
+                "y": 35
             }
         },
         "Départ_v2.json": {
@@ -75,14 +75,22 @@
             "scale": 0.582258064516129,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 335.76177285318556,
-                "y": 740.2216066481994
+                "x": 336.6204986149585,
+                "y": 495.4847645429364
+            }
+        },
+        "arene1.json": {
+            "scale": 1.093939393939394,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 224.41828254847647,
+                "y": 393.98891966759004
             }
         },
         "centre_pokemon.json": {
             "expandedObjectLayers": [
-                11,
-                10
+                10,
+                11
             ],
             "scale": 0.75,
             "selectedLayer": 4,
@@ -137,8 +145,8 @@
         },
         "shop.json": {
             "expandedObjectLayers": [
-                7,
-                6
+                6,
+                7
             ],
             "scale": 0.75,
             "selectedLayer": 5,
@@ -188,7 +196,8 @@
         "mountain.tsx",
         "centre_pokemon.json",
         "shop.json",
-        "Labo.json"
+        "Labo.json",
+        "arene1.json"
     ],
     "project": "poke_map.tiled-project",
     "property.type": "bool",

@@ -85,14 +85,17 @@ export const BattleLogicMixin = {
         
         if (effectiveness > 1) {
             this.message = "C'est super efficace !"
+            await new Promise(r => setTimeout(r, 2000))
         }
 
         else if (effectiveness > 0 && effectiveness < 1) {
             this.message = "Ce n'est pas très efficace..."
+            await new Promise(r => setTimeout(r, 2000))
         }
 
         else if (effectiveness === 0) {
             this.message = "C'est inefficace"
+            await new Promise(r => setTimeout(r, 2000))
         }
         await new Promise(r => setTimeout(r, 1000))
     },
@@ -122,7 +125,26 @@ export const BattleLogicMixin = {
     },
 
     async loadNextTrainerPokemon(poke) {
+        this.message = `${this.encounter.pokemon} est K.O. !`
+        this.trainerMessageDone = false
+        
+        setTimeout(() => {
+            this.trainerMessageDone = true
+            this.message = null
+        }, 2000)
+        //mets un timer pour attendre la fin du message avant d'envoyer le nouveau pokémon
+        await new Promise(resolve => {
+            const check = setInterval(() => {
+                if (this.trainerMessageDone) {
+                    clearInterval(check)
+                    resolve()
+                }
+            }, 16)
+        })
+
         //récupère les infos du prochains pokemon du dresseur
+        this.encounter.id = poke.id
+        this.encounter.niveau = poke.niveau
         const calcStat = (base, niveau) => Math.floor((2 * base * niveau) / 100) + 5
         const capitalize = name => name.charAt(0).toUpperCase() + name.slice(1)
         this.enemySprite = await this.loadImage(`./assets/pokemon/dp/${poke.id}.png`)
@@ -155,5 +177,6 @@ export const BattleLogicMixin = {
             this.enemyMoveClass[move] = d.damage_class.name
             this.enemyMoveTypes[move] = d.type.name
         }))
+        this.loadingNextPoke = false
     }
 }

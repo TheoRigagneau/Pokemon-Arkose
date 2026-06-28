@@ -1,4 +1,21 @@
 export default function Hero({ onAuthClick, user }) {
+
+  if (user) {
+    boutonTelechargement = (
+      <a href="/game.zip" download>
+        <button className="mt-8 bg-[#c8900a] text-[#0d0a05] font-bold px-8 py-3 rounded hover:bg-[#e0a010]">
+          Télécharger le jeu
+        </button>
+      </a>
+    )
+  } else {
+    boutonTelechargement = (
+      <button onClick={onAuthClick} className="mt-8 bg-[#c8900a] text-[#0d0a05] font-bold px-8 py-3 rounded hover:bg-[#e0a010]">
+        Télécharger le jeu
+      </button>
+    )
+  }
+
   return (
     //suite de la page principale
     <section className="bg-[#fffdf7] text-center py-16">
@@ -8,18 +25,8 @@ export default function Hero({ onAuthClick, user }) {
       <p className="text-[#5a4a20] mt-6 max-w-xl mx-auto text-sm">
         Un fan-game Pokémon jouable dans le navigateur
       </p>
-
-      {user ? (
-        <a href="/Pokemon-Arkose.zip" download>
-          <button className="mt-8 bg-[#c8900a] text-[#0d0a05] font-bold px-8 py-3 rounded hover:bg-[#e0a010]">
-            Télécharger le jeu
-          </button>
-        </a>
-      ) : (
-        <button onClick={onAuthClick} className="mt-8 bg-[#c8900a] text-[#0d0a05] font-bold px-8 py-3 rounded hover:bg-[#e0a010]">
-          Télécharger le jeu
-        </button>
-      )}
+      
+      {boutonTelechargement}
     </section>
   )
 }

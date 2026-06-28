@@ -8,12 +8,13 @@ export default class DialogBox {
     }
 
     //dialogbox qui s'arrête dès qu'elle tombe sur un pipe 
-    show(texte, choices = null) {
+    show(texte, choices = null, callback = null) {
         this.messages = texte.split("|");
         this.currentIndex = 0;
         this.isOpen = true;
         this.choices = null;
         this.selectedChoice = 0;
+        this.callback = callback
         
         if (choices) {
             this.pendingChoices = choices;
@@ -30,6 +31,10 @@ export default class DialogBox {
                 this.pendingChoices = null;
             } else {
                 this.isOpen = false;
+                if (this.callback) {
+                    this.callback()
+                    this.callback = null
+                }
             }
         }
     }

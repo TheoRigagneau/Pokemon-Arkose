@@ -61,6 +61,50 @@ export default function AuthModal({ onClose, onLogin, initialTab = "login" }) {
     onLogin({ pseudo: data.pseudo, token: data.token, role: data.role })
   }
 
+  let titre
+  if (tab === "login") {
+     titre = "CONNEXION" 
+  }
+
+  else if (tab === "register") { 
+    titre = "INSCRIPTION" 
+  }
+
+  else  {
+    titre = "MOT DE PASSE OUBLIÉ" 
+  }
+
+  let classeLogin = "flex-1 py-3 text-sm font-bold tracking-wide "
+  if (tab === "login")  {
+    classeLogin += "text-[#1a1005] border-b-2 border-[#c8900a]" 
+  }
+
+  else {
+    classeLogin += "text-[#9a7a38]"
+  }
+
+  let classeRegister = "flex-1 py-3 text-sm font-bold tracking-wide "
+  if (tab === "register") {
+    classeRegister += "text-[#1a1005] border-b-2 border-[#c8900a]" 
+  }
+
+  else {
+    classeRegister += "text-[#9a7a38]"
+  }
+
+  let btntexte
+  if (tab === "login") {
+    btntexte = "Se connecter"
+  }
+
+  else if (tab === "register") {
+    btntexte = "Créer mon compte"
+  }
+
+  else {
+    btntexte = "Envoyer le lien"
+  }
+
   return (
     //page d'authentification (login, register et aussi la page pour remplacer son mdp)
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -68,9 +112,7 @@ export default function AuthModal({ onClose, onLogin, initialTab = "login" }) {
 
         <div className="bg-[#1a1408] rounded-t flex items-center justify-between px-6 py-3">
           <h2 className="text-[#e8c060] font-bold tracking-widest text-sm">
-            {tab === "login"
-              ? "CONNEXION"   : tab === "register"
-              ? "INSCRIPTION" : "MOT DE PASSE OUBLIÉ"}
+            {titre}
           </h2>
           <button onClick={onClose} className="text-[#7a5a20] hover:text-[#c8a050] text-xl">×</button>
         </div>
@@ -78,23 +120,13 @@ export default function AuthModal({ onClose, onLogin, initialTab = "login" }) {
         <div className="flex border-b border-[#e0cc88]">
           <button
             onClick={() => setTab("login")}
-            className={`flex-1 py-3 text-sm font-bold tracking-wide ${
-              tab === "login"
-                ? "text-[#1a1005] border-b-2 border-[#c8900a]"
-                : "text-[#9a7a38]"
-            }`}
-          >
+            className={classeLogin}>
             Connexion
           </button>
 
           <button
             onClick={() => setTab("register")}
-            className={`flex-1 py-3 text-sm font-bold tracking-wide ${
-              tab === "register"
-                ? "text-[#1a1005] border-b-2 border-[#c8900a]"
-                : "text-[#9a7a38]"
-            }`}
-          >
+            className={classeRegister}>
             S'inscrire
           </button>
         </div>
@@ -166,8 +198,7 @@ export default function AuthModal({ onClose, onLogin, initialTab = "login" }) {
           )}
 
           <button onClick={handleSubmit} className="bg-[#1a1408] text-[#e8c060] font-bold py-3 rounded tracking-widest text-sm hover:bg-[#3a2a10]">
-            {tab === "login" ? "Se connecter" : tab === "register"
-                             ? "Créer mon compte" : "Envoyer le lien"}
+            {btntexte}
           </button>
         </div>
       </div>

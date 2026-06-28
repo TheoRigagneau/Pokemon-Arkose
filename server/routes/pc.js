@@ -18,4 +18,9 @@ router.delete('/', async (req, res) => {
     res.json({ ok: true })
 })
 
+router.delete('/:id', async (req, res) => {
+    await PC.findByIdAndDelete(req.params.id)
+    res.json({ ok: true })
+})
+
 module.exports = router

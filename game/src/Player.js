@@ -235,6 +235,7 @@ class Player {
                     const info = Object.fromEntries(
                         obj.properties.map(p => [p.name, p.value])
                     );
+                    console.log("PNJ info:", info)
 
                     if (checkX >= obj.x - 16 && checkX < obj.x + obj.width + 16 &&
                         checkY >= obj.y - 16 && checkY < obj.y + obj.height + 16) {
@@ -246,6 +247,29 @@ class Player {
                             obj.forcedDirection = dx > 0 ? "west" : "east"
                         } else {
                             obj.forcedDirection = dy > 0 ? "north" : "south"
+                        }
+
+                        if (info.pokemon && info.pnjID) {
+                            console.log("fetch trainer:", info.pnjID)
+                            const res = await fetch(`http://localhost:3000/api/trainers/${info.pnjID}`)
+                            const trainer = await res.json()
+
+                            if (trainer.defeated) {
+                                this.dialogBox.show(info.dialogueDefeated ?? info.dialogue)
+                            } else {
+                                console.log("bon match")
+                                this.dialogBox.show(info.dialogue, null, async () => {
+                                    const pokemons = info.pokemon.split(",").map(p => {
+                                        const [id, niveau] = p.split(":")
+                                        return { id: parseInt(id), niveau: parseInt(niveau) }
+                                    })
+                                    console.log("dispatch trainerBattle", { pnjID: info.pnjID, badgeId: info.badgeId })
+                                    window.dispatchEvent(new CustomEvent("trainerBattle", {
+                                        detail: { pnjID: info.pnjID, pokemons, dialogue: info.dialogue, badgeId: info.badgeId ?? null }
+                                    }))
+                                })
+                            }
+                            return
                         }
 
                         if (info.dialogue) {
@@ -344,7 +368,7 @@ class Player {
                             
                             //lance le combat
                             window.dispatchEvent(new CustomEvent("trainerBattle", {
-                                detail: { pnjID: info.pnjID, pokemons, dialogue: info.dialogue }
+                                detail: { pnjID: info.pnjID, pokemons, dialogue: info.dialogue, badgeId: info.badgeId ?? null }
                             }))
                         }
                     }

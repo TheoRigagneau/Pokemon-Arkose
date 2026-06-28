@@ -125,7 +125,7 @@ export const BattleDataMixin = {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    pokemon: evoName,
+                    pokemon: capitalize(evoName),
                     id: evoData.id,
                     maxHP: evoMaxHP,
                     currentHP: evoMaxHP
